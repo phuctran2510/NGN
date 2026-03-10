@@ -2078,9 +2078,9 @@ export default function PythonApp({ onHome }) {
         padding:"6px 14px",display:"flex",gap:8,alignItems:"center",
         fontSize:10,flexWrap:"wrap"}}>
         <span>👨‍🏫</span>
-        <span style={{color:"#4ade80",fontWeight:700}}>Vũ Minh Quan</span>
+        <span style={{color:"#4ade80",fontWeight:700}}>Trần Vĩnh Phúc</span>
         <span style={{color:"#1a3a1a"}}>|</span>
-        <a href="mailto:quanvm@dlu.edu.vn" style={{color:"#2a7a3a"}}>quanvm@dlu.edu.vn</a>
+        <a href="mailto:phuctv@dlu.edu.vn" style={{color:"#2a7a3a"}}>phuctv@dlu.edu.vn</a>
         <span className="hide-sm" style={{color:"#1a3a1a"}}>|</span>
         <span className="hide-sm" style={{color:"#1a4a2a"}}>Đại học Đà Lạt · Khoa CNTT</span>
         <div style={{marginLeft:"auto",display:"flex",gap:6}}>
@@ -2530,10 +2530,10 @@ export default function PythonApp({ onHome }) {
       {/* ── FOOTER ─────────────────────────── */}
       <footer style={{borderTop:"1px solid #0a1e0a",padding:"8px 14px",
         display:"flex",justifyContent:"space-between",alignItems:"center",
-        fontSize:9,color:"#1a3a1a",flexWrap:"wrap",gap:4}}>
+        fontSize:9,color:"#1a3a1a",flexWrap:"wrap",gap:4}}> 
         <span>🐍 Python Lab · ĐH Đà Lạt</span>
-        <span>GV: Vũ Minh Quan ·
-          <a href="mailto:quanvm@dlu.edu.vn" style={{color:"#4ade80",marginLeft:4}}>quanvm@dlu.edu.vn</a>
+        <span>GV: Trần Vĩnh Phúc ·
+          <a href="mailto:phuctv@dlu.edu.vn" style={{color:"#4ade80",marginLeft:4}}>phuctv@dlu.edu.vn</a>
         </span>
         <span className="hide-sm">{MODS.length} Modules · {totalLabs} Labs · {totalEx}+ Bài Tập</span>
       </footer>
