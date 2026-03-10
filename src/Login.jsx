@@ -27,7 +27,7 @@ export default function Login({ onLogin }) {
         borderRadius:"10px",
         textAlign:"center"
       }}>
-        <h2>NGN Lab Access</h2>
+        <h2>Mạng Thế Hệ Mới & VoIP</h2>
 
         <input
           type="password"
