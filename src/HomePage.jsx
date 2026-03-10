@@ -1,100 +1,67 @@
 import { useState, useEffect } from "react";
 
-// ── Shared Login ─────────────────────────────────────────────
-export function Login({ onLogin }) {
-  const [pw, setPw] = useState("");
-  const [err, setErr] = useState(false);
-  const [shake, setShake] = useState(false);
-
-  const attempt = () => {
-    if (pw === "ngn2025") { localStorage.setItem("auth","true"); onLogin(); }
-    else { setErr(true); setShake(true); setTimeout(()=>setShake(false),500); }
-  };
-
-  return (
-    <div style={{minHeight:"100vh",display:"flex",flexDirection:"column",justifyContent:"center",alignItems:"center",background:"#050b14",fontFamily:"'JetBrains Mono','Courier New',monospace"}}>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Orbitron:wght@700;900&display=swap');
-        @keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-10px)}40%,80%{transform:translateX(10px)}}
-        @keyframes borderPulse{0%,100%{box-shadow:0 0 0 0 #00d4ff33}50%{box-shadow:0 0 0 8px #00d4ff00}}
-        @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
-        .login-glow{animation:borderPulse 3s infinite}
-        .shake-it{animation:shake 0.4s ease}
-        .logo-float{animation:float 4s ease-in-out infinite}
-      `}</style>
-      <div className="logo-float" style={{marginBottom:32,textAlign:"center"}}>
-        <div style={{fontSize:56,marginBottom:8}}>🌐</div>
-        <div style={{fontFamily:"Orbitron,sans-serif",fontWeight:900,fontSize:20,color:"#00d4ff",letterSpacing:4}}>DLU · NETWORK LAB</div>
-        <div style={{fontSize:11,color:"#1a4a6a",letterSpacing:3,marginTop:4}}>TRƯỜNG ĐẠI HỌC ĐÀ LẠT</div>
-      </div>
-      <div className={`login-glow ${shake?"shake-it":""}`} style={{background:"#07111c",border:"1px solid #0a2a40",borderRadius:12,padding:"32px 40px",width:320,textAlign:"center"}}>
-        <div style={{fontSize:11,color:"#1a4a6a",letterSpacing:3,marginBottom:20}}>— ACCESS PORTAL —</div>
-        <input type="password" placeholder="Nhập mật khẩu..." value={pw}
-          onChange={e=>{setPw(e.target.value);setErr(false);}}
-          onKeyDown={e=>e.key==="Enter"&&attempt()}
-          style={{width:"100%",padding:"11px 14px",background:"#020a14",border:`1px solid ${err?"#ff4444":"#0a2a40"}`,borderRadius:6,color:"#c0d8f0",fontSize:12,fontFamily:"JetBrains Mono,monospace",boxSizing:"border-box",outline:"none",transition:"border 0.2s"}}/>
-        {err && <div style={{color:"#ff4444",fontSize:11,marginTop:6}}>⚠ Sai mật khẩu</div>}
-        <button onClick={attempt} style={{width:"100%",marginTop:14,padding:"11px",background:"linear-gradient(135deg,#0a2a3a,#041a2a)",border:"1px solid #00d4ff",borderRadius:6,color:"#00d4ff",fontFamily:"Orbitron,sans-serif",fontSize:11,cursor:"pointer",letterSpacing:3,transition:"all 0.2s"}}
-          onMouseOver={e=>{e.target.style.background="linear-gradient(135deg,#041a2a,#021018)";e.target.style.boxShadow="0 0 20px #00d4ff22";}}
-          onMouseOut={e=>{e.target.style.background="linear-gradient(135deg,#0a2a3a,#041a2a)";e.target.style.boxShadow="none";}}>
-          ĐĂNG NHẬP
-        </button>
-      </div>
-      <div style={{marginTop:20,fontSize:10,color:"#0a2a40"}}>phuctv@dlu.edu.vn · quanvm@dlu.edu.vn</div>
-    </div>
-  );
-}
-
-// ── Home Page ────────────────────────────────────────────────
 export default function HomePage({ onNavigate }) {
   const [hovered, setHovered] = useState(null);
   const [tick, setTick] = useState(0);
-  useEffect(()=>{const t=setInterval(()=>setTick(p=>p+1),2000);return()=>clearInterval(t);},[]);
+  useEffect(() => { const t = setInterval(() => setTick(p => p + 1), 2000); return () => clearInterval(t); }, []);
 
   const courses = [
     {
-      id:"ngn",
-      icon:"🌐",
-      color:"#00d4ff",
-      glow:"#00d4ff",
-      title:"MẠNG THẾ HỆ MỚI & VoIP",
-      code:"MMT-NGN",
-      sub:"Next Generation Networks · IPv6 · VoIP",
-      desc:"Triển khai hạ tầng mạng thế hệ mới IPv6, BGP, OSPFv3, Multicast, QoS, Cisco CME và FreePBX trên nền tảng EVE-NG.",
-      stats:[{v:"6",l:"Modules"},{v:"25",l:"Labs"},{v:"10",l:"Đề Tài"},{v:"IPv6",l:"Protocol"}],
-      tags:["OSPFv3","BGP","IPv6","QoS","Cisco CME","FreePBX","PIM-SM","HSRP"],
-      instructor:"Trần Vĩnh Phúc",
-      email:"phuctv@dlu.edu.vn",
-      level:"Advanced",
-      credits:"4 TC",
+      id: "ngn",
+      icon: "🌐",
+      color: "#00d4ff",
+      title: "MẠNG THẾ HỆ MỚI & VoIP",
+      code: "MMT-NGN",
+      sub: "Next Generation Networks · IPv6 · VoIP",
+      desc: "Triển khai hạ tầng IPv6, BGP, OSPFv3, Multicast, QoS, Cisco CME và FreePBX trên nền tảng EVE-NG.",
+      stats: [{ v: "6", l: "Modules" }, { v: "25", l: "Labs" }, { v: "10", l: "Đề Tài" }, { v: "IPv6", l: "Protocol" }],
+      tags: ["OSPFv3", "BGP", "IPv6", "QoS", "Cisco CME", "FreePBX"],
+      instructor: "Trần Vĩnh Phúc",
+      email: "phuctv@dlu.edu.vn",
+      level: "Advanced",
+      credits: "4 TC",
     },
     {
-      id:"sdn",
-      icon:"🧠",
-      color:"#38bdf8",
-      glow:"#38bdf8",
-      title:"CHUYÊN ĐỀ MẠNG MÁY TÍNH 1",
-      code:"20CT3124",
-      sub:"SDN · Python · APIC-EM · Network Automation",
-      desc:"Lập trình mạng với Python, REST API và bộ điều khiển SDN (Cisco APIC-EM, Mininet). Tự động hóa quản lý mạng và xây dựng ứng dụng điều khiển tập trung.",
-      stats:[{v:"6",l:"Chương"},{v:"8",l:"Labs TH"},{v:"5",l:"Đề Tài"},{v:"Python",l:"Language"}],
-      tags:["Python","REST API","APIC-EM","OpenFlow","Mininet","JSON","Postman","Ryu"],
-      instructor:"Vũ Minh Quan",
-      email:"quanvm@dlu.edu.vn",
-      level:"Intermediate",
-      credits:"4 TC",
+      id: "sdn",
+      icon: "🧠",
+      color: "#38bdf8",
+      title: "CHUYÊN ĐỀ MẠNG MÁY TÍNH 1",
+      code: "20CT3124",
+      sub: "SDN · Python · APIC-EM · Automation",
+      desc: "Lập trình mạng với Python, REST API và bộ điều khiển SDN (APIC-EM, Mininet, Ryu). Tự động hóa quản lý mạng.",
+      stats: [{ v: "8", l: "Labs TH" }, { v: "20", l: "Đề Tài" }, { v: "Python", l: "Language" }, { v: "SDN", l: "Paradigm" }],
+      tags: ["Python", "REST API", "APIC-EM", "OpenFlow", "Mininet", "Ryu"],
+      instructor: "Vũ Minh Quan",
+      email: "quanvm@dlu.edu.vn",
+      level: "Intermediate",
+      credits: "4 TC",
+    },
+    {
+      id: "python",
+      icon: "🐍",
+      color: "#4ade80",
+      title: "LẬP TRÌNH PYTHON",
+      code: "20CT3125",
+      sub: "Python Cơ Bản → Nâng Cao · OOP · Data · API",
+      desc: "Toàn diện từ cú pháp cơ bản, cấu trúc dữ liệu, OOP, đến xử lý File/DB, Async, Testing và dự án thực tiễn.",
+      stats: [{ v: "6", l: "Modules" }, { v: "33", l: "Labs" }, { v: "80+", l: "Bài Tập" }, { v: "🐍", l: "Python 3.10+" }],
+      tags: ["OOP", "Pandas", "FastAPI", "pytest", "asyncio", "Regex"],
+      instructor: "Vũ Minh Quan",
+      email: "quanvm@dlu.edu.vn",
+      level: "Beginner→Advanced",
+      credits: "3 TC",
     },
   ];
 
   const news = [
-    {icon:"📢",text:"Lab EVE-NG đã cập nhật Cisco IOL 15.9 — sinh viên cần re-import images",time:"Mới nhất"},
-    {icon:"📅",text:"Hạn nộp báo cáo nhóm Chuyên Đề 1: cuối tuần 12",time:"Sắp tới"},
-    {icon:"✅",text:"Kết quả kiểm tra giữa kỳ NGN đã được cập nhật trên hệ thống",time:"3 ngày trước"},
-    {icon:"🆕",text:"Đề tài mới: SDN Intent-Based Config Tool — xem mục Đề Tài",time:"1 tuần trước"},
+    { icon: "🐍", text: "Lớp Python mới khai giảng — mật khẩu: python2025", time: "Mới nhất" },
+    { icon: "📢", text: "Lab EVE-NG đã cập nhật Cisco IOL 15.9 — sinh viên cần re-import images", time: "2 ngày trước" },
+    { icon: "📅", text: "Hạn nộp báo cáo nhóm Chuyên Đề 1: cuối tuần 12", time: "Sắp tới" },
+    { icon: "✅", text: "Kết quả kiểm tra giữa kỳ NGN đã được cập nhật trên hệ thống", time: "1 tuần trước" },
   ];
 
   return (
-    <div style={{minHeight:"100vh",background:"#050b14",fontFamily:"'JetBrains Mono','Courier New',monospace",color:"#c0d8f0",overflowX:"hidden"}}>
+    <div style={{ minHeight: "100vh", background: "#050b14", fontFamily: "'JetBrains Mono','Courier New',monospace", color: "#c0d8f0", overflowX: "hidden" }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Orbitron:wght@700;900&display=swap');
         *{box-sizing:border-box;margin:0;padding:0}
@@ -102,164 +69,208 @@ export default function HomePage({ onNavigate }) {
         @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
         @keyframes scanline{0%{transform:translateY(-100%)}100%{transform:translateY(100vh)}}
         @keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
-        @keyframes gridMove{0%{transform:translateY(0)}100%{transform:translateY(50px)}}
         .fadein{animation:fadeUp 0.5s ease both}
         .blink{animation:blink 1.5s infinite}
         .course-card{transition:all 0.3s ease;cursor:pointer}
-        .course-card:hover{transform:translateY(-4px)}
+        .course-card:hover{transform:translateY(-3px)}
         a{color:inherit;text-decoration:none}
+        @media(max-width:640px){.desk-only{display:none!important}}
       `}</style>
 
       {/* Animated grid background */}
-      <div style={{position:"fixed",inset:0,pointerEvents:"none",zIndex:0,overflow:"hidden"}}>
-        <div style={{position:"absolute",inset:0,backgroundImage:"linear-gradient(#00d4ff06 1px,transparent 1px),linear-gradient(90deg,#00d4ff06 1px,transparent 1px)",backgroundSize:"40px 40px"}}/>
-        <div style={{position:"absolute",top:0,left:"20%",width:1,height:"100%",background:"linear-gradient(to bottom,transparent,#00d4ff08,transparent)",animation:"scanline 8s linear infinite"}}/>
-        <div style={{position:"absolute",top:0,left:"70%",width:1,height:"100%",background:"linear-gradient(to bottom,transparent,#38bdf808,transparent)",animation:"scanline 12s linear infinite 4s"}}/>
+      <div style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 0, overflow: "hidden" }}>
+        <div style={{ position: "absolute", inset: 0, backgroundImage: "linear-gradient(#00d4ff05 1px,transparent 1px),linear-gradient(90deg,#00d4ff05 1px,transparent 1px)", backgroundSize: "40px 40px" }} />
+        <div style={{ position: "absolute", top: 0, left: "25%", width: 1, height: "100%", background: "linear-gradient(to bottom,transparent,#00d4ff07,transparent)", animation: "scanline 9s linear infinite" }} />
+        <div style={{ position: "absolute", top: 0, left: "70%", width: 1, height: "100%", background: "linear-gradient(to bottom,transparent,#4ade8005,transparent)", animation: "scanline 13s linear infinite 5s" }} />
       </div>
 
       {/* Header */}
-      <header style={{position:"relative",zIndex:10,borderBottom:"1px solid #0a2a40",background:"rgba(5,11,20,0.95)",backdropFilter:"blur(10px)",padding:"12px 24px",display:"flex",alignItems:"center",gap:12}}>
-        <div style={{width:40,height:40,borderRadius:8,background:"#00d4ff0d",border:"1.5px solid #00d4ff33",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18}}>🌐</div>
-        <div>
-          <div style={{fontFamily:"Orbitron,sans-serif",fontWeight:900,fontSize:14,color:"#00d4ff",letterSpacing:3}}>DLU · NETWORK LAB</div>
-          <div style={{fontSize:10,color:"#1a5a7a",letterSpacing:2}}>Khoa CNTT · Trường Đại học Đà Lạt</div>
-        </div>
-        <div style={{marginLeft:"auto",display:"flex",gap:8,alignItems:"center"}}>
-          <div style={{fontSize:10,color:"#1a4a6a"}}>
-            <span className="blink" style={{color:"#10b981",marginRight:4}}>●</span>ONLINE
+      <div style={{ position: "relative", zIndex: 1, borderBottom: "1px solid #0a2a40", padding: "12px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <div style={{ width: 42, height: 42, borderRadius: 10, background: "#00d4ff0a", border: "1px solid #00d4ff22", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22 }}>🌐</div>
+          <div>
+            <div style={{ fontFamily: "Orbitron,sans-serif", fontWeight: 900, fontSize: 17, color: "#00d4ff", letterSpacing: 2 }}>DLU NETWORK LAB</div>
+            <div style={{ fontSize: 9, color: "#1a4a6a", letterSpacing: 3, marginTop: 1 }}>TRƯỜNG ĐẠI HỌC ĐÀ LẠT · KHOA CNTT</div>
           </div>
-          <button onClick={()=>{localStorage.removeItem("auth");window.location.reload();}} style={{background:"transparent",border:"1px solid #1a3a5a",borderRadius:5,color:"#3a6a8a",padding:"4px 10px",fontSize:10,cursor:"pointer",letterSpacing:1}}>LOGOUT</button>
         </div>
-      </header>
-
-      <main style={{position:"relative",zIndex:10,maxWidth:1100,margin:"0 auto",padding:"32px 20px"}}>
-
-        {/* Hero */}
-        <div className="fadein" style={{textAlign:"center",marginBottom:48}}>
-          <div style={{fontSize:12,color:"#1a5a7a",letterSpacing:4,marginBottom:12}}>— HỆ THỐNG HỌC TẬP —</div>
-          <h1 style={{fontFamily:"Orbitron,sans-serif",fontWeight:900,fontSize:"clamp(22px,4vw,40px)",color:"#fff",lineHeight:1.2,marginBottom:12}}>
-            NETWORK ENGINEERING<br/>
-            <span style={{color:"#00d4ff"}}>LAB PORTAL</span>
-          </h1>
-          <p style={{fontSize:12,color:"#4a7a9a",maxWidth:520,margin:"0 auto",lineHeight:1.9}}>
-            Nền tảng học tập chuyên sâu về mạng máy tính — từ IPv6 NGN đến SDN automation.<br/>
-            Chọn môn học để bắt đầu.
-          </p>
+        <div className="desk-only" style={{ display: "flex", gap: 6 }}>
+          {courses.map(c => (
+            <div key={c.id} style={{ background: `${c.color}08`, border: `1px solid ${c.color}22`, borderRadius: 6, padding: "3px 10px", fontSize: 9, color: c.color }}>
+              {c.icon} {c.code}
+            </div>
+          ))}
         </div>
+      </div>
 
-        {/* Course Cards */}
-        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(320px,1fr))",gap:20,marginBottom:40}}>
-          {courses.map((c,i) => (
-            <div key={c.id} className="course-card fadein"
-              style={{animationDelay:`${i*0.15}s`,background:hovered===c.id?`linear-gradient(135deg,#07111c,#040d18)`:"#07111c",border:`1px solid ${hovered===c.id?c.color:"#0a2030"}`,borderRadius:12,overflow:"hidden",boxShadow:hovered===c.id?`0 0 40px ${c.glow}22`:"none"}}
-              onMouseEnter={()=>setHovered(c.id)} onMouseLeave={()=>setHovered(null)}
-              onClick={()=>onNavigate(c.id)}>
+      {/* Hero */}
+      <div style={{ position: "relative", zIndex: 1, textAlign: "center", padding: "36px 20px 28px" }}>
+        <div className="fadein" style={{ fontSize: 10, color: "#1a4a6a", letterSpacing: 4, marginBottom: 12 }}>
+          <span className="blink">▮</span> PORTAL THỰC HÀNH — HỌC KỲ 2 · 2024-2025
+        </div>
+        <div className="fadein" style={{ fontFamily: "Orbitron,sans-serif", fontWeight: 900, fontSize: "clamp(22px,5vw,38px)", color: "#ffffff", lineHeight: 1.2, marginBottom: 10 }}>
+          CHỌN <span style={{ color: "#00d4ff" }}>LỚP HỌC</span> CỦA BẠN
+        </div>
+        <div className="fadein" style={{ fontSize: 11, color: "#2a6a8a", maxWidth: 500, margin: "0 auto" }}>
+          Mỗi lớp có mật khẩu riêng · {courses.length} khóa học · {courses.reduce((s, c) => s + parseInt(c.stats[1].v || 0), 0)}+ Labs thực hành
+        </div>
+      </div>
 
-              {/* Card top accent */}
-              <div style={{height:3,background:`linear-gradient(90deg,transparent,${c.color},transparent)`}}/>
+      {/* Course Cards */}
+      <div style={{ position: "relative", zIndex: 1, padding: "0 16px 32px", maxWidth: 1100, margin: "0 auto" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(300px,1fr))", gap: 14 }}>
+          {courses.map((course, i) => {
+            const isH = hovered === course.id;
+            return (
+              <div key={course.id} className="course-card fadein"
+                style={{
+                  background: "#07111c",
+                  border: `1px solid ${isH ? course.color : course.color + "22"}`,
+                  borderRadius: 12,
+                  overflow: "hidden",
+                  boxShadow: isH ? `0 0 30px ${course.color}15` : "none",
+                  animationDelay: `${i * 0.1}s`,
+                  transition: "all 0.3s ease",
+                }}
+                onMouseEnter={() => setHovered(course.id)}
+                onMouseLeave={() => setHovered(null)}
+                onClick={() => onNavigate(course.id)}
+              >
+                {/* Top accent */}
+                <div style={{ height: 3, background: `linear-gradient(90deg,${course.color}88,${course.color}22)` }} />
 
-              <div style={{padding:"24px"}}>
-                {/* Badge row */}
-                <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:16}}>
-                  <div style={{display:"flex",gap:6}}>
-                    <span style={{background:`${c.color}15`,border:`1px solid ${c.color}40`,borderRadius:4,padding:"2px 8px",fontSize:10,color:c.color,fontFamily:"Orbitron,sans-serif",letterSpacing:1}}>{c.code}</span>
-                    <span style={{background:"#1a3a5a20",border:"1px solid #1a3a5a",borderRadius:4,padding:"2px 8px",fontSize:10,color:"#4a8a9a"}}>{c.credits}</span>
-                  </div>
-                  <span style={{fontSize:28}}>{c.icon}</span>
-                </div>
-
-                <h2 style={{fontFamily:"Orbitron,sans-serif",fontWeight:700,fontSize:14,color:"#fff",lineHeight:1.3,marginBottom:6}}>{c.title}</h2>
-                <div style={{fontSize:10,color:c.color,marginBottom:12,letterSpacing:1}}>{c.sub}</div>
-                <p style={{fontSize:11,color:"#5a8aaa",lineHeight:1.8,marginBottom:16}}>{c.desc}</p>
-
-                {/* Stats */}
-                <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8,marginBottom:16}}>
-                  {c.stats.map((s,si)=>(
-                    <div key={si} style={{textAlign:"center",background:`${c.color}08`,borderRadius:6,padding:"8px 4px",border:`1px solid ${c.color}15`}}>
-                      <div style={{fontFamily:"Orbitron,sans-serif",fontWeight:700,fontSize:14,color:c.color}}>{s.v}</div>
-                      <div style={{fontSize:9,color:"#3a6a8a",marginTop:2}}>{s.l}</div>
+                <div style={{ padding: "18px 18px 14px" }}>
+                  {/* Header row */}
+                  <div style={{ display: "flex", alignItems: "flex-start", gap: 12, marginBottom: 12 }}>
+                    <div style={{ width: 48, height: 48, borderRadius: 11, background: `${course.color}0f`, border: `1.5px solid ${course.color}30`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, flexShrink: 0 }}>
+                      {course.icon}
                     </div>
-                  ))}
-                </div>
-
-                {/* Tags */}
-                <div style={{display:"flex",flexWrap:"wrap",gap:4,marginBottom:16}}>
-                  {c.tags.map(t=><span key={t} style={{background:"#020a14",border:`1px solid ${c.color}25`,borderRadius:3,padding:"2px 6px",fontSize:9,color:c.color}}>{t}</span>)}
-                </div>
-
-                {/* Instructor */}
-                <div style={{borderTop:`1px solid ${c.color}15`,paddingTop:12,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                  <div>
-                    <div style={{fontSize:10,color:"#3a5a7a"}}>Giảng viên</div>
-                    <div style={{fontSize:11,color:"#c0d8f0",fontWeight:700}}>{c.instructor}</div>
-                    <div style={{fontSize:10,color:c.color}}>{c.email}</div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ display: "flex", gap: 6, alignItems: "center", marginBottom: 4, flexWrap: "wrap" }}>
+                        <span style={{ background: `${course.color}18`, border: `1px solid ${course.color}35`, borderRadius: 4, padding: "1px 7px", fontSize: 9, color: course.color, fontWeight: 700 }}>
+                          {course.code}
+                        </span>
+                        <span style={{ background: "#0a1a2a", border: "1px solid #0a2a40", borderRadius: 4, padding: "1px 7px", fontSize: 9, color: "#2a6a8a" }}>
+                          {course.level}
+                        </span>
+                        <span style={{ fontSize: 9, color: "#1a4a6a" }}>{course.credits}</span>
+                      </div>
+                      <div style={{ fontFamily: "Orbitron,sans-serif", fontWeight: 700, fontSize: 12, color: "#e0ecf8", lineHeight: 1.3 }}>
+                        {course.title}
+                      </div>
+                    </div>
                   </div>
-                  <div style={{background:`${c.color}15`,border:`1px solid ${c.color}40`,borderRadius:8,padding:"8px 16px",color:c.color,fontSize:11,fontFamily:"Orbitron,sans-serif",fontWeight:700,letterSpacing:1,display:"flex",alignItems:"center",gap:6}}>
-                    VÀO HỌC <span style={{fontSize:14}}>→</span>
+
+                  <div style={{ fontSize: 10, color: "#2a6a8a", marginBottom: 8 }}>{course.sub}</div>
+                  <div style={{ fontSize: 11, color: "#3a7a9a", lineHeight: 1.7, marginBottom: 12 }}>{course.desc}</div>
+
+                  {/* Stats */}
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 6, marginBottom: 12 }}>
+                    {course.stats.map((s, j) => (
+                      <div key={j} style={{ background: "#020a14", border: `1px solid ${course.color}15`, borderRadius: 6, padding: "7px 4px", textAlign: "center" }}>
+                        <div style={{ fontFamily: "Orbitron,sans-serif", fontSize: 13, color: course.color, fontWeight: 700 }}>{s.v}</div>
+                        <div style={{ fontSize: 8, color: "#1a4a6a", marginTop: 2 }}>{s.l}</div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Tags */}
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginBottom: 14 }}>
+                    {course.tags.map(t => (
+                      <span key={t} style={{ background: "#020a14", border: `1px solid ${course.color}20`, borderRadius: 4, padding: "2px 7px", fontSize: 9, color: course.color + "99" }}>
+                        {t}
+                      </span>
+                    ))}
+                  </div>
+
+                  {/* Instructor + CTA */}
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: `1px solid ${course.color}15`, paddingTop: 12 }}>
+                    <div style={{ fontSize: 9, color: "#1a4a6a" }}>
+                      <div style={{ color: "#2a7a9a" }}>👨‍🏫 {course.instructor}</div>
+                      <div style={{ marginTop: 2, color: course.color + "66" }}>{course.email}</div>
+                    </div>
+                    <div style={{
+                      background: `${course.color}12`,
+                      border: `1px solid ${course.color}40`,
+                      borderRadius: 7, padding: "7px 14px",
+                      fontSize: 10, color: course.color,
+                      fontFamily: "Orbitron,sans-serif",
+                      letterSpacing: 1,
+                      boxShadow: isH ? `0 0 12px ${course.color}25` : "none",
+                      transition: "all 0.2s"
+                    }}>
+                      VÀO LỚP →
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
-        {/* Info grid */}
-        <div className="fadein" style={{animationDelay:"0.4s",display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(240px,1fr))",gap:16,marginBottom:32}}>
-          {/* Announcements */}
-          <div style={{background:"#07111c",border:"1px solid #0a2030",borderRadius:10,padding:"18px",gridColumn:"span 2"}}>
-            <div style={{fontFamily:"Orbitron,sans-serif",fontWeight:700,fontSize:11,color:"#f59e0b",marginBottom:14,letterSpacing:2}}>📢 THÔNG BÁO</div>
-            {news.map((n,i)=>(
-              <div key={i} style={{display:"flex",gap:10,padding:"8px 0",borderBottom:i<news.length-1?"1px solid #0a1828":"none",alignItems:"flex-start"}}>
-                <span style={{fontSize:14,flexShrink:0}}>{n.icon}</span>
-                <div style={{flex:1}}>
-                  <div style={{fontSize:11,color:"#8ab0c8",lineHeight:1.6}}>{n.text}</div>
+        {/* Announcements + Quick Links */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(280px,1fr))", gap: 14, marginTop: 20 }}>
+          {/* News */}
+          <div style={{ background: "#07111c", border: "1px solid #0a2a40", borderRadius: 10, overflow: "hidden" }}>
+            <div style={{ background: "#041420", borderBottom: "1px solid #0a2a40", padding: "10px 14px", display: "flex", alignItems: "center", gap: 8 }}>
+              <span style={{ color: "#00d4ff", fontSize: 13 }}>📡</span>
+              <span style={{ fontFamily: "Orbitron,sans-serif", fontSize: 10, color: "#00d4ff", letterSpacing: 2 }}>THÔNG BÁO</span>
+            </div>
+            <div style={{ padding: "8px 0" }}>
+              {news.map((n, i) => (
+                <div key={i} style={{ padding: "9px 14px", borderBottom: i < news.length - 1 ? "1px solid #0a1a2a" : "none" }}>
+                  <div style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
+                    <span style={{ fontSize: 13, flexShrink: 0 }}>{n.icon}</span>
+                    <div>
+                      <div style={{ fontSize: 11, color: "#4a8aaa", lineHeight: 1.6 }}>{n.text}</div>
+                      <div style={{ fontSize: 9, color: "#1a4a6a", marginTop: 3 }}>{n.time}</div>
+                    </div>
+                  </div>
                 </div>
-                <span style={{fontSize:9,color:"#1a4a6a",flexShrink:0,marginTop:2}}>{n.time}</span>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
 
-          {/* Quick Links */}
-          <div style={{background:"#07111c",border:"1px solid #0a2030",borderRadius:10,padding:"18px"}}>
-            <div style={{fontFamily:"Orbitron,sans-serif",fontWeight:700,fontSize:11,color:"#10b981",marginBottom:14,letterSpacing:2}}>🔗 LIÊN KẾT NHANH</div>
-            {[
-              {l:"EVE-NG Web UI",u:"http://192.168.1.100",c:"#00d4ff"},
-              {l:"Cisco DevNet Sandbox",u:"https://devnetsandbox.cisco.com",c:"#38bdf8"},
-              {l:"APIC-EM Sandbox",u:"https://sandboxapicem.cisco.com",c:"#38bdf8"},
-              {l:"Zoiper Softphone",u:"https://www.zoiper.com",c:"#a855f7"},
-              {l:"Wireshark Download",u:"https://www.wireshark.org",c:"#10b981"},
-              {l:"Python 3 Docs",u:"https://docs.python.org",c:"#4ade80"},
-            ].map((lk,i)=>(
-              <div key={i} style={{padding:"6px 0",borderBottom:i<5?"1px solid #0a1828":"none"}}>
-                <a href={lk.u} target="_blank" rel="noopener noreferrer" style={{fontSize:11,color:lk.c,display:"flex",alignItems:"center",gap:6}}>
-                  <span style={{fontSize:9,opacity:0.6}}>→</span>{lk.l}
+          {/* Quick links */}
+          <div style={{ background: "#07111c", border: "1px solid #0a2a40", borderRadius: 10, overflow: "hidden" }}>
+            <div style={{ background: "#041420", borderBottom: "1px solid #0a2a40", padding: "10px 14px", display: "flex", alignItems: "center", gap: 8 }}>
+              <span style={{ color: "#38bdf8", fontSize: 13 }}>🔗</span>
+              <span style={{ fontFamily: "Orbitron,sans-serif", fontSize: 10, color: "#38bdf8", letterSpacing: 2 }}>QUICK LINKS</span>
+            </div>
+            <div style={{ padding: "8px" }}>
+              {[
+                { icon: "🖥️", label: "EVE-NG Lab", url: "http://192.168.1.10", color: "#00d4ff" },
+                { icon: "📚", label: "Tài liệu khoa", url: "https://fit.dlu.edu.vn", color: "#38bdf8" },
+                { icon: "🐍", label: "Python Docs", url: "https://docs.python.org/3", color: "#4ade80" },
+                { icon: "📊", label: "Cisco DevNet", url: "https://developer.cisco.com", color: "#38bdf8" },
+                { icon: "🎓", label: "E-Learning DLU", url: "https://elearning.dlu.edu.vn", color: "#a78bfa" },
+              ].map((link, i) => (
+                <a key={i} href={link.url} target="_blank" rel="noreferrer">
+                  <div style={{
+                    display: "flex", gap: 10, alignItems: "center",
+                    padding: "9px 10px", borderRadius: 6, marginBottom: 4,
+                    background: "#041020", border: `1px solid ${link.color}15`,
+                    transition: "all 0.2s", cursor: "pointer"
+                  }}>
+                    <span style={{ fontSize: 15 }}>{link.icon}</span>
+                    <span style={{ fontSize: 11, color: link.color }}>{link.label}</span>
+                    <span style={{ marginLeft: "auto", fontSize: 10, color: "#1a4a6a" }}>→</span>
+                  </div>
                 </a>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
 
-        {/* Footer info */}
-        <div className="fadein" style={{animationDelay:"0.5s",display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(200px,1fr))",gap:12}}>
-          {[
-            {label:"Hệ thống",items:["EVE-NG Community 5.0+","Cisco IOL L3/L2","Ubuntu 22.04 LTS","Python 3.10+"]},
-            {label:"Môn NGN/IPv6",items:["IPv6 Dual-Stack","OSPFv3 Multi-Area","BGP Multi-Homing","Cisco CME + FreePBX"]},
-            {label:"Môn Chuyên Đề 1",items:["SDN Architecture","Python REST API","Cisco APIC-EM","Mininet + OpenFlow"]},
-            {label:"Liên hệ",items:["phuctv@dlu.edu.vn","quanvm@dlu.edu.vn","Khoa CNTT — DLU","Lâm Đồng 2024"]},
-          ].map((col,i)=>(
-            <div key={i} style={{background:"#07111c",border:"1px solid #0a2030",borderRadius:8,padding:"14px"}}>
-              <div style={{fontSize:10,color:"#3a6a8a",letterSpacing:2,marginBottom:8,fontFamily:"Orbitron,sans-serif"}}>{col.label.toUpperCase()}</div>
-              {col.items.map((item,j)=><div key={j} style={{fontSize:11,color:"#4a7a9a",padding:"3px 0",borderBottom:j<col.items.length-1?"1px solid #0a1828":"none"}}>{item}</div>)}
-            </div>
-          ))}
+        {/* Footer */}
+        <div style={{ textAlign: "center", marginTop: 28, padding: "16px", borderTop: "1px solid #0a1a2a" }}>
+          <div style={{ fontSize: 9, color: "#1a3a5a", letterSpacing: 2, marginBottom: 6 }}>
+            DLU NETWORK LAB PORTAL · KHOA CNTT · ĐẠI HỌC ĐÀ LẠT
+          </div>
+          <div style={{ fontSize: 9, color: "#1a4a6a" }}>
+            GV: Trần Vĩnh Phúc (phuctv@dlu.edu.vn) · Vũ Minh Quan (quanvm@dlu.edu.vn)
+          </div>
         </div>
-      </main>
-
-      <footer style={{position:"relative",zIndex:10,borderTop:"1px solid #0a2030",padding:"12px 24px",display:"flex",justifyContent:"space-between",alignItems:"center",fontSize:10,color:"#0a2a40",flexWrap:"wrap",gap:6}}>
-        <span>DLU Network Lab Portal · Khoa CNTT</span>
-        <span>© 2025 Trường Đại học Đà Lạt</span>
-        <span>NGN/IPv6 · SDN/Python · VoIP</span>
-      </footer>
+      </div>
     </div>
   );
 }
