@@ -1,4 +1,6 @@
 import { useState } from "react";
+import {  useEffect } from "react";
+import Login from "./Login";
 
 const MODULES = [
   {
@@ -546,7 +548,18 @@ export default function App(){
   const [filter,setFilter]=useState("all");
   const TopoComp=TMAP[topo];
   const filtered=filter==="all"?THESIS:THESIS.filter(t=>t.level===filter);
+  const [loggedIn, setLoggedIn] = useState(false);
 
+  useEffect(() => {
+    const auth = localStorage.getItem("auth");
+    if (auth === "true") {
+      setLoggedIn(true);
+    }
+  }, []);
+
+  if (!loggedIn) {
+    return <Login onLogin={()=>setLoggedIn(true)} />;
+  }
   return(
     <div style={{background:"#020d18",minHeight:"100vh",fontFamily:"'Share Tech Mono','Courier New',monospace",color:"#c0d8f0",width:"100%",overflowX:"hidden"}}>
       <style>{`
