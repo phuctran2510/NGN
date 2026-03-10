@@ -1,8 +1,84 @@
-import { useState } from "react";
-import {  useEffect } from "react";
-import Login from "./Login";
+import { useState, useEffect } from "react";
 
-const MODULES = [
+// ============================================================
+// LOGIN COMPONENT
+// ============================================================
+function Login({ onLogin }) {
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState(false);
+  const [shake, setShake] = useState(false);
+
+  const handleLogin = () => {
+    if (password === "ngn2025") {
+      localStorage.setItem("auth", "true");
+      onLogin();
+    } else {
+      setError(true);
+      setShake(true);
+      setTimeout(() => setShake(false), 500);
+    }
+  };
+
+  return (
+    <div style={{
+      height:"100vh", display:"flex", justifyContent:"center", alignItems:"center",
+      background:"#020d18", fontFamily:"'Share Tech Mono','Courier New',monospace",
+      flexDirection:"column", gap:0
+    }}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@600;700&display=swap');
+        @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+        @keyframes glow{0%,100%{box-shadow:0 0 20px #00d4ff22}50%{box-shadow:0 0 40px #00d4ff44}}
+        .login-box{animation:glow 3s infinite}
+        .shake{animation:shake 0.4s ease}
+        input:focus{outline:none!important;border-color:#00d4ff!important;box-shadow:0 0 0 2px #00d4ff22!important}
+      `}</style>
+      <div style={{
+        textAlign:"center", marginBottom:32,
+      }}>
+        <div style={{fontSize:48, marginBottom:8}}>🌐</div>
+        <div style={{fontFamily:"Rajdhani,sans-serif",fontWeight:700,fontSize:22,color:"#00d4ff",letterSpacing:4}}>DLU NETWORK LAB</div>
+        <div style={{fontSize:12,color:"#1a4a6a",marginTop:4,letterSpacing:2}}>TRƯỜNG ĐẠI HỌC ĐÀ LẠT</div>
+      </div>
+      <div className={`login-box ${shake?"shake":""}`} style={{
+        background:"#040f18", border:"1px solid #0a2a40", borderRadius:12,
+        padding:"32px 40px", width:320, textAlign:"center"
+      }}>
+        <div style={{color:"#3a6a8a",fontSize:12,letterSpacing:3,marginBottom:20}}>ACCESS PORTAL</div>
+        <input
+          type="password"
+          placeholder="Nhập mật khẩu..."
+          value={password}
+          onChange={e=>{setPassword(e.target.value);setError(false);}}
+          onKeyDown={e=>e.key==="Enter"&&handleLogin()}
+          style={{
+            width:"100%", padding:"10px 14px", background:"#020d18",
+            border:`1px solid ${error?"#ff4444":"#1a3a5a"}`,
+            borderRadius:6, color:"#c0d8f0", fontSize:13,
+            fontFamily:"Share Tech Mono,monospace", boxSizing:"border-box",
+            transition:"all 0.2s"
+          }}
+        />
+        {error&&<div style={{color:"#ff4444",fontSize:11,marginTop:6}}>⚠ Sai mật khẩu</div>}
+        <button onClick={handleLogin} style={{
+          width:"100%", marginTop:14, padding:"10px", background:"#0a2a3a",
+          border:"1px solid #00d4ff", borderRadius:6, color:"#00d4ff",
+          fontFamily:"Share Tech Mono,monospace", fontSize:13, cursor:"pointer",
+          transition:"all 0.2s", letterSpacing:2
+        }}
+          onMouseOver={e=>e.target.style.background="#041a2a"}
+          onMouseOut={e=>e.target.style.background="#0a2a3a"}
+        >ĐĂNG NHẬP</button>
+      </div>
+      <div style={{marginTop:20,color:"#0a2a40",fontSize:11}}>Trần Vĩnh Phúc · phuctv@dlu.edu.vn</div>
+    </div>
+  );
+}
+
+// ============================================================
+// NGN DATA
+// ============================================================
+const NGN_MODULES = [
   {
     id:1, icon:"🔧", color:"#00d4ff", dark:"#002a3f",
     title:"DEPLOY HẠ TẦNG IPv6 NGN",
@@ -212,7 +288,7 @@ const MODULES = [
       },
       { num:"6.2", name:"Security Hardening", dur:"150 phút", diff:3,
         deploy:["RA Guard: policy BLOCK-RA, apply access ports","DHCPv6 Snooping: vlan 10,20,100, trust uplink","IPv6 Source Guard: access ports","uRPF strict: ipv6 verify unicast","VoIP trusted list + SIP auth","Pentest: Scapy IPv6 RA flood"],
-        cmds:`ipv6 nd raguard policy BLOCK-RA\n  device-role host\ninterface range Gi0/1-24\n  ipv6 nd raguard attach-policy BLOCK-RA\n!\nipv6 dhcp snooping\nipv6 dhcp snooping vlan 10,20,100\ninterface GigabitEthernet0/25\n  ipv6 dhcp snooping trust\n!\ninterface GigabitEthernet0/1\n  ipv6 source-guard\n  ipv6 verify unicast source reachable-via rx\n!\nshow ipv6 nd raguard policy`,
+        cmds:`ipv6 nd raguard policy BLOCK-RA\n  device-role host\ninterface range Gi0/1-24\n  ipv6 nd raguard attach-policy BLOCK-RA\n!\nipv6 dhcp snooping\nipv6 dhcp snooping vlan 10,20,100\ninterface GigabitEthernet0/25\n  ipv6 dhcp snooping trust\n!\nshow ipv6 nd raguard policy`,
         topo:`Security Layers:\n[uRPF+BGP Filter]──────EDGE\n[OSPFv3 IPsec Auth]────CORE\n[RA Guard+DHCPv6 Snoop]DIST\n[Src Guard+Port Sec]───ACCESS\n[SIP Auth+Trusted List]VoIP`,
         result:["Rogue RA bị chặn 100%","DHCPv6 spoofing thất bại","uRPF drop spoofed packets","VoIP toll fraud prevented"],
         hints:["Test: Scapy 'sendp(IPv6/ICMPv6ND_RA())'","uRPF strict cần symmetric routing","show ipv6 dhcp snooping statistics","Fail2ban auto-block sau 3 fail"]
@@ -228,10 +304,9 @@ const MODULES = [
   }
 ];
 
-const THESIS = [
+const NGN_THESIS = [
   { id:1, icon:"🏢", color:"#00d4ff", level:"medium", dur:"6-8 tuần", team:"2-5 SV",
     title:"Mạng LAN Doanh Nghiệp Nhỏ IPv6 Dual-Stack",
-    sub:"SME Dual-Stack LAN",
     overview:"Thiết kế mạng LAN 50-100 nhân viên với IPv6 dual-stack, OSPFv3, HSRP và VoIP cơ bản.",
     scope:["IPv6 dual-stack cho 3 VLAN","OSPFv3 single-area + HSRP","Cisco CME 20 IP phones","QoS 3 lớp: Voice/Video/Data","DHCPv6 và SLAAC"],
     topo:"ISP─BGP─EDGE-R1\n─OSPFv3─CORE-SW\n─VLAN10/20/100─ACCESS\n─CME(20 phones)",
@@ -241,7 +316,6 @@ const THESIS = [
   },
   { id:2, icon:"🎓", color:"#f59e0b", level:"medium", dur:"6-8 tuần", team:"2-5 SV",
     title:"Hệ Thống VoIP FreePBX cho Giáo Dục",
-    sub:"Education VoIP Platform",
     overview:"FreePBX cho trường học với IVR tự động, call recording cho giảng dạy và voicemail-to-email.",
     scope:["50 extensions giảng viên + nhân viên","IVR: Tuyển sinh, Đào tạo, Hành chính","Call Recording cho hội thảo","Ring Groups theo phòng ban","Voicemail-to-Email"],
     topo:"FreePBX Server\n├─Ext 1XXX: Giảng viên\n├─Ext 2XXX: VP/Phòng ban\n├─IVR 9000: Auto Attendant\n└─SIP Trunk: PSTN",
@@ -251,7 +325,6 @@ const THESIS = [
   },
   { id:3, icon:"🔐", color:"#10b981", level:"medium", dur:"6-8 tuần", team:"2-5 SV",
     title:"Bảo Mật IPv6 First-Hop & Layer 2",
-    sub:"IPv6 First-Hop Security",
     overview:"Phân tích tấn công RA flood, DHCPv6 spoofing và triển khai giải pháp phòng thủ.",
     scope:["Tấn công: RA flood, DHCPv6 rouge","RA Guard, DHCPv6 Snooping","IPv6 Source Guard, DAD Proxy","So sánh trước/sau bảo mật","Vulnerability assessment"],
     topo:"Attack Lab:\n[Attacker]─[Access SW]─[Victim]\nDefense:\n[RA Guard + DHCPv6 Snoop + uRPF]",
@@ -259,29 +332,8 @@ const THESIS = [
     result:["RA flood thành công lab","RA Guard chặn 100%","DHCPv6 Snooping OK","Report với recommendations"],
     tech:["Scapy","THC-IPv6","RA Guard","DHCPv6 Snooping","uRPF","Wireshark"]
   },
-  { id:4, icon:"📊", color:"#a855f7", level:"medium", dur:"7-9 tuần", team:"2-5 SV",
-    title:"Giám Sát NGN với Zabbix & ELK Stack",
-    sub:"NGN Network Monitoring",
-    overview:"Hệ thống giám sát toàn diện với Zabbix, ELK Stack, NetFlow và alerting tự động.",
-    scope:["Zabbix 6.x SNMPv3 Cisco devices","ELK Stack Syslog aggregation","NetFlow v9 traffic patterns","IP SLA VoIP MOS probes","Alerting Telegram/Email"],
-    topo:"Devices─SNMPv3─→Zabbix\n─Syslog─→ELK Stack\n─NetFlow─→Grafana\nAlert: Telegram Bot",
-    deploy:["Tuần 1-2: Zabbix, Cisco templates","Tuần 3-4: ELK, Syslog","Tuần 5-6: NetFlow, Grafana","Tuần 7-9: IP SLA, alerting"],
-    result:["Dashboard real-time","Syslog detect anomalies","NetFlow top talkers","VoIP MOS trend"],
-    tech:["Zabbix","ELK","Grafana","NetFlow","SNMPv3","IP SLA"]
-  },
-  { id:5, icon:"🌍", color:"#ff6b35", level:"medium", dur:"8-10 tuần", team:"3-5 SV",
-    title:"Campus Đa Tòa Nhà IPv6 cho Đại Học",
-    sub:"Campus Network IPv6",
-    overview:"Campus 3 tòa nhà với IPv6, WAN redundancy, QoS cho e-learning và VoIP.",
-    scope:["3 tòa nhà: Giảng đường, Thư viện, KTX","OSPFv3 multi-area, BGP dual ISP","QoS: e-learning, video conf, VoIP","CME 100 phones + FreePBX","Multicast IPTV"],
-    topo:"Internet─BGP─EDGE(HQ)\n─OSPFv3─CORE\n─Area1: Giảng Đường\n─Area2: Thư Viện\n─Area3: KTX",
-    deploy:["Tuần 1-2: Thiết kế 3 tòa","Tuần 3-4: Backbone inter-building","Tuần 5-6: CME + FreePBX","Tuần 7-8: Multicast, QoS","Tuần 9-10: Security, monitoring"],
-    result:["IPv6 kết nối 3 tòa","150 VoIP endpoints","IPTV 10 channels","QoS đảm bảo e-learning"],
-    tech:["OSPFv3","MP-BGP","CME","FreePBX","PIM-SM","CBWFQ"]
-  },
-  { id:6, icon:"🏆", color:"#00d4ff", level:"hard", dur:"8-10 tuần", team:"3-5 SV",
+  { id:4, icon:"🏆", color:"#ff6b35", level:"hard", dur:"8-10 tuần", team:"3-5 SV",
     title:"NGN Doanh Nghiệp Toàn Diện IPv6",
-    sub:"SME IPv6 NGN Full ★ NCKH/Luận Văn Tốt Nghiệp",
     overview:"Hệ thống NGN hoàn chỉnh 100-500 nhân viên, 3 chi nhánh, dual ISP, Multicast, QoS, CME+FreePBX.",
     scope:["3 chi nhánh WAN IPv6","OSPFv3 multi-area, BGP multi-homing","PIM-SM Multicast video","QoS 6 lớp E2E","CME 50 + FreePBX 30","Security + Monitoring"],
     topo:"HQ─BGP─ISP-A/B\n─OSPFv3─BRANCH1/2\nCME(50)+FreePBX(30)\nMulticast + QoS 6 classes",
@@ -289,39 +341,8 @@ const THESIS = [
     result:["BGP failover < 30s","VoIP MOS ≥ 4.0","Video multicast OK","Zero critical vulns"],
     tech:["OSPFv3","MP-BGP","HSRPv2","CME","FreePBX","PIM-SM","LLQ","uRPF"]
   },
-  { id:7, icon:"☁️", color:"#ff6b35", level:"hard", dur:"10-12 tuần", team:"3-5 SV",
-    title:"IPTV IPv6 Multicast cho ISP/Campus",
-    sub:"IPv6 Multicast IPTV ★ NCKH/Luận Văn Tốt Nghiệp",
-    overview:"Nền tảng IPTV 500+ subscribers, 50 kênh HD qua IPv6 Multicast với redundancy và QoS.",
-    scope:["PIM-SM Anycast RP 50+ kênh HD","MLDv2 snooping tối ưu BW","QoS AF41 video, WRED","SSM (FF3x::) on-demand","Load test 500 streams"],
-    topo:"VideoServer─PIM-SM─RP1/RP2(Anycast)\n─BSR─DIST/ACCESS\nGroup: FF1E::/16 (50 ch)\nSSM: FF3E::/32 (on-demand)",
-    deploy:["T1-2: PIM-SM + Anycast RP","T3-4: MLDv2, SSM","T5-6: QoS, load test","T7-8: Redundancy, failover","T9-10: CDN, benchmark"],
-    result:["50 streams không drop","RP failover < 5s","BW 95% tiết kiệm vs unicast","Jitter, loss, capacity report"],
-    tech:["PIM-SM","Anycast RP","MLDv2","SSM","AF41","WRED","iperf3"]
-  },
-  { id:8, icon:"🔒", color:"#10b981", level:"hard", dur:"10-12 tuần", team:"3-5 SV",
-    title:"Zero Trust Security NGN/IPv6",
-    sub:"IPv6 Zero Trust ★ NCKH/Luận Văn Tốt Nghiệp",
-    overview:"Zero Trust cho NGN/IPv6 với threat modeling, penetration testing và automated response.",
-    scope:["Threat: RA flood, BGP hijack","IPv6 First-Hop Security","Zone-Based Firewall, uRPF","SIP TLS, SRTP, toll fraud","SIEM: log correlation"],
-    topo:"[Internet]─uRPF─EDGE\n[LAN]─RA Guard─ACCESS\n[VoIP]─SIP TLS/SRTP─CME\nSIEM: ELK + rules",
-    deploy:["T1-2: Threat modeling","T3-4: First-Hop Security","T5-6: Zone FW, VoIP sec","T7-8: SIEM, correlation","T9-10: Pentest, report"],
-    result:["Zero critical vulns","SIEM detect < 60s","SIP TLS/SRTP 100%","Pentest CVSS scoring"],
-    tech:["RA Guard","uRPF","Zone-FW","SIP TLS","SRTP","ELK","Fail2ban"]
-  },
-  { id:9, icon:"🚀", color:"#a855f7", level:"hard", dur:"12 tuần", team:"2-5 SV",
-    title:"Migration IPv4→IPv6 ISP với MPLS 6VPE",
-    sub:"ISP IPv6 Migration ★ Luận Văn",
-    overview:"Lộ trình chuyển đổi mạng IPv4 ISP sang IPv6 với MPLS backbone, 6VPE, NAT64, DS-Lite.",
-    scope:["Audit IPv4, migration roadmap","Dual-Stack coexistence","MPLS 6VPE/6PE","NAT64/DNS64","DS-Lite CGN","Performance eval"],
-    topo:"IPv4 Legacy\n→ Dual-Stack\n→ MPLS 6VPE\n→ NAT64/DNS64\n→ DS-Lite CGN\n→ Pure IPv6",
-    deploy:["T1-2: Audit + roadmap","T3-4: Dual-Stack","T5-6: MPLS 6VPE","T7-8: NAT64+DNS64","T9-10: DS-Lite","T11-12: Test+report"],
-    result:["6VPE L3VPN OK","NAT64 transparent","DS-Lite IPv4 via IPv6","Performance report"],
-    tech:["MPLS","LDP","6VPE","6PE","NAT64","DNS64","DS-Lite","BGP"]
-  },
-  { id:10, icon:"🤖", color:"#f59e0b", level:"hard", dur:"12 tuần", team:"2-5 SV",
+  { id:5, icon:"🤖", color:"#a855f7", level:"hard", dur:"10-12 tuần", team:"3-5 SV",
     title:"SDN IPv6 NGN: ONOS & QoS Automation",
-    sub:"SDN IPv6 NGN ★ Luận Văn",
     overview:"ONOS SDN controller với NGN/IPv6, tự động hóa QoS policy qua REST API.",
     scope:["ONOS quản lý OpenFlow switches","IPv6 forwarding SDN","QoS automation REST API","So sánh SDN vs Traditional","Performance benchmark"],
     topo:"ONOS Controller\n─OpenFlow─OVS Switches\n─REST API─Apps\nIPv6: OVS1─OVS2─OVS3",
@@ -331,425 +352,1064 @@ const THESIS = [
   }
 ];
 
-const TOPOS=[{id:"full",label:"Tổng Thể"},{id:"ospf",label:"OSPFv3"},{id:"bgp",label:"BGP"},{id:"mcast",label:"Multicast"},{id:"voip",label:"VoIP"}];
+// ============================================================
+// SDN DATA (Chuyên Đề MMT 1)
+// ============================================================
+const SDN_CHAPTERS = [
+  {
+    id:1, icon:"🧠", color:"#38bdf8", title:"TỔNG QUAN SDN",
+    desc:"Kiến trúc, mô hình và giao thức điều khiển trong Software-Defined Networking.",
+    theory:[
+      { title:"1.1 Tổng quan về SDN", content:`Software-Defined Networking (SDN) là kiến trúc mạng tách biệt control plane khỏi data plane.
 
-function SvgWrap({children}){
-  return <svg viewBox="0 0 800 460" style={{width:"100%",height:"100%",display:"block"}}>
-    <rect width="800" height="460" fill="#020d18"/>
-    {[...Array(17)].map((_,i)=><line key={`v${i}`} x1={i*50} y1="0" x2={i*50} y2="460" stroke="#0a2030" strokeWidth="0.5"/>)}
-    {[...Array(10)].map((_,i)=><line key={`h${i}`} x1="0" y1={i*50} x2="800" y2={i*50} stroke="#0a2030" strokeWidth="0.5"/>)}
-    {children}
-  </svg>;
-}
+Đặc điểm chính:
+• Centralized Control: Bộ điều khiển tập trung quản lý toàn bộ mạng
+• Programmability: Lập trình mạng qua API (REST, gRPC)
+• Open Standards: OpenFlow, NETCONF, RESTCONF
+• Abstraction: Tách biệt hardware và software
 
-function TopoFull(){
-  return <SvgWrap>
-    <ellipse cx="400" cy="36" rx="80" ry="20" fill="#041520" stroke="#00d4ff" strokeWidth="1.5"/>
-    <text x="400" y="40" textAnchor="middle" fill="#00d4ff" fontSize="11" fontFamily="monospace" fontWeight="bold">INTERNET</text>
-    {[{x:30,l:"ISP-A",s:"AS100"},{x:622,l:"ISP-B",s:"AS200"}].map((n,i)=>(
-      <g key={i}><rect x={n.x} y={72} width={108} height={40} rx="6" fill="#100800" stroke="#ff6b35" strokeWidth="1.5"/>
-      <text x={n.x+54} y={90} textAnchor="middle" fill="#ff6b35" fontSize="15" fontFamily="monospace" fontWeight="bold">{n.l}</text>
-      <text x={n.x+54} y={104} textAnchor="middle" fill="#6a2a00" fontSize="8" fontFamily="monospace">{n.s}</text></g>
-    ))}
-    <line x1="340" y1="52" x2="138" y2="72" stroke="#ff6b35" strokeWidth="1.5" strokeDasharray="5,3"/>
-    <line x1="460" y1="52" x2="652" y2="72" stroke="#ff6b35" strokeWidth="1.5" strokeDasharray="5,3"/>
-    {[{x:100,l:"EDGE-R1",s:"AS65001"},{x:540,l:"EDGE-R2",s:"AS65001"}].map((n,i)=>(
-      <g key={i}><rect x={n.x} y={158} width={130} height={48} rx="7" fill="#041520" stroke="#00d4ff" strokeWidth="2"/>
-      <text x={n.x+65} y={178} textAnchor="middle" fill="#00d4ff" fontSize="11" fontFamily="monospace" fontWeight="bold">{n.l}</text>
-      <text x={n.x+65} y={194} textAnchor="middle" fill="#1a7a9a" fontSize="9" fontFamily="monospace">{n.s}</text></g>
-    ))}
-    <line x1="84" y1="112" x2="148" y2="158" stroke="#ff6b35" strokeWidth="1.5"/>
-    <line x1="676" y1="112" x2="622" y2="158" stroke="#ff6b35" strokeWidth="1.5"/>
-    <line x1="230" y1="182" x2="540" y2="182" stroke="#00d4ff" strokeWidth="1" strokeDasharray="5,3"/>
-    <text x="400" y="177" textAnchor="middle" fill="#00d4ff" fontSize="8" fontFamily="monospace">iBGP</text>
-    {[{x:210,l:"CORE-R1",s:"RP·OSPFv3"},{x:430,l:"CORE-R2",s:"BSR·ABR"}].map((n,i)=>(
-      <g key={i}><rect x={n.x} y={262} width={130} height={46} rx="7" fill="#041a10" stroke="#10b981" strokeWidth="2"/>
-      <text x={n.x+65} y={282} textAnchor="middle" fill="#10b981" fontSize="11" fontFamily="monospace" fontWeight="bold">{n.l}</text>
-      <text x={n.x+65} y={298} textAnchor="middle" fill="#1a7a4a" fontSize="9" fontFamily="monospace">{n.s}</text></g>
-    ))}
-    <line x1="165" y1="206" x2="248" y2="262" stroke="#00d4ff" strokeWidth="1.5"/>
-    <line x1="605" y1="206" x2="528" y2="262" stroke="#00d4ff" strokeWidth="1.5"/>
-    <line x1="340" y1="285" x2="430" y2="285" stroke="#10b981" strokeWidth="1.5"/>
-    {[{x:148,l:"DIST-SW1",s:"HSRP·VLAN10"},{x:488,l:"DIST-SW2",s:"HSRP·VLAN100"}].map((n,i)=>(
-      <g key={i}><rect x={n.x} y={364} width={120} height={42} rx="6" fill="#080e18" stroke="#a855f7" strokeWidth="1.5"/>
-      <text x={n.x+60} y={383} textAnchor="middle" fill="#a855f7" fontSize="15" fontFamily="monospace" fontWeight="bold">{n.l}</text>
-      <text x={n.x+60} y={397} textAnchor="middle" fill="#5a1a9a" fontSize="8" fontFamily="monospace">{n.s}</text></g>
-    ))}
-    <line x1="258" y1="308" x2="232" y2="364" stroke="#a855f7" strokeWidth="1.5"/>
-    <line x1="502" y1="308" x2="522" y2="364" stroke="#a855f7" strokeWidth="1.5"/>
-    {[{x:52,l:"ACC-SW1"},{x:175,l:"ACC-SW2"},{x:478,l:"ACC-SW3"},{x:600,l:"CME+PBX"}].map((n,i)=>(
-      <g key={i}><rect x={n.x} y={425} width={98} height={30} rx="4" fill="#06080e" stroke={i<3?"#f59e0b":"#a855f7"} strokeWidth="1"/>
-      <text x={n.x+49} y={444} textAnchor="middle" fill={i<3?"#f59e0b":"#a855f7"} fontSize="9" fontFamily="monospace">{n.l}</text></g>
-    ))}
-    <line x1="190" y1="406" x2="112" y2="425" stroke="#f59e0b" strokeWidth="1"/>
-    <line x1="205" y1="406" x2="218" y2="425" stroke="#f59e0b" strokeWidth="1"/>
-    <line x1="520" y1="406" x2="516" y2="425" stroke="#f59e0b" strokeWidth="1"/>
-    <line x1="550" y1="406" x2="640" y2="425" stroke="#a855f7" strokeWidth="1"/>
-  </SvgWrap>;
-}
+Mô hình 3 tầng SDN:
+┌─────────────────────────────┐
+│  Application Layer (Apps)   │ ← Business Logic
+├─────────────────────────────┤
+│  Control Layer (Controller) │ ← Cisco APIC-EM, ONOS, ODL
+├─────────────────────────────┤
+│  Infrastructure Layer       │ ← Switches, Routers (Data Plane)
+└─────────────────────────────┘
 
-function TopoOSPF(){
-  return <SvgWrap>
-    <ellipse cx="400" cy="185" rx="190" ry="108" fill="none" stroke="#10b981" strokeWidth="1.5" strokeDasharray="8,4" opacity="0.7"/>
-    <text x="400" y="92" textAnchor="middle" fill="#10b981" fontSize="12" fontFamily="monospace" fontWeight="bold">AREA 0 — BACKBONE</text>
-    {[{x:270,l:"CORE-R1",s:"ABR·RP"},{x:410,l:"CORE-R2",s:"ABR·BSR"}].map((n,i)=>(
-      <g key={i}><rect x={n.x} y={155} width={115} height={44} rx="7" fill="#041a10" stroke="#10b981" strokeWidth="2"/>
-      <text x={n.x+57} y={174} textAnchor="middle" fill="#10b981" fontSize="15" fontFamily="monospace" fontWeight="bold">{n.l}</text>
-      <text x={n.x+57} y={190} textAnchor="middle" fill="#1a7a4a" fontSize="8" fontFamily="monospace">{n.s}</text></g>
-    ))}
-    <line x1="385" y1="177" x2="410" y2="177" stroke="#10b981" strokeWidth="1.5"/>
-    {[{x:286,l:"EDGE-R1"},{x:396,l:"EDGE-R2"}].map((n,i)=>(
-      <g key={i}><rect x={n.x} y={242} width={100} height={36} rx="6" fill="#041520" stroke="#00d4ff" strokeWidth="1.5"/>
-      <text x={n.x+50} y={258} textAnchor="middle" fill="#00d4ff" fontSize="9" fontFamily="monospace" fontWeight="bold">{n.l}</text>
-      <text x={n.x+50} y={272} textAnchor="middle" fill="#1a5a8a" fontSize="7" fontFamily="monospace">ASBR·BGP</text></g>
-    ))}
-    <line x1="328" y1="199" x2="328" y2="242" stroke="#10b981" strokeWidth="1.5"/>
-    <line x1="452" y1="199" x2="446" y2="242" stroke="#10b981" strokeWidth="1.5"/>
-    <ellipse cx="148" cy="360" rx="138" ry="86" fill="none" stroke="#00d4ff" strokeWidth="1.5" strokeDasharray="6,3" opacity="0.6"/>
-    <text x="148" y="282" textAnchor="middle" fill="#00d4ff" fontSize="11" fontFamily="monospace" fontWeight="bold">AREA 1 — DATA</text>
-    <rect x="88" y={315} width={120} height={38} rx="6" fill="#041520" stroke="#00d4ff" strokeWidth="1.5"/>
-    <text x="148" y="332" textAnchor="middle" fill="#00d4ff" fontSize="9" fontFamily="monospace" fontWeight="bold">DIST-SW1</text>
-    <text x="148" y="346" textAnchor="middle" fill="#1a5a8a" fontSize="7" fontFamily="monospace">VLAN10,20·HSRP</text>
-    {[{x:44,l:"ACC-SW1"},{x:153,l:"ACC-SW2"}].map((n,i)=>(
-      <g key={i}><rect x={n.x} y={390} width={88} height={30} rx="4" fill="#03080e" stroke="#4a8aae" strokeWidth="1"/>
-      <text x={n.x+44} y={409} textAnchor="middle" fill="#4a8aae" fontSize="8" fontFamily="monospace">{n.l}</text></g>
-    ))}
-    <line x1="133" y1="353" x2="100" y2="390" stroke="#4a8aae" strokeWidth="1"/>
-    <line x1="163" y1="353" x2="195" y2="390" stroke="#4a8aae" strokeWidth="1"/>
-    <line x1="297" y1="177" x2="210" y2="315" stroke="#00d4ff" strokeWidth="1.5" strokeDasharray="4,3"/>
-    <ellipse cx="638" cy="360" rx="138" ry="86" fill="none" stroke="#a855f7" strokeWidth="1.5" strokeDasharray="6,3" opacity="0.6"/>
-    <text x="638" y="282" textAnchor="middle" fill="#a855f7" fontSize="11" fontFamily="monospace" fontWeight="bold">AREA 2 — VOICE</text>
-    <rect x="578" y={315} width={120} height={38} rx="6" fill="#0a0618" stroke="#a855f7" strokeWidth="1.5"/>
-    <text x="638" y="332" textAnchor="middle" fill="#a855f7" fontSize="9" fontFamily="monospace" fontWeight="bold">DIST-SW2</text>
-    <text x="638" y="346" textAnchor="middle" fill="#5a1a9a" fontSize="7" fontFamily="monospace">VLAN100·Voice</text>
-    {[{x:538,l:"ACC-SW3"},{x:643,l:"CME-GW"}].map((n,i)=>(
-      <g key={i}><rect x={n.x} y={390} width={88} height={30} rx="4" fill="#03080e" stroke="#7c3aed" strokeWidth="1"/>
-      <text x={n.x+44} y={409} textAnchor="middle" fill="#7c3aed" fontSize="8" fontFamily="monospace">{n.l}</text></g>
-    ))}
-    <line x1="623" y1="353" x2="594" y2="390" stroke="#7c3aed" strokeWidth="1"/>
-    <line x1="651" y1="353" x2="681" y2="390" stroke="#7c3aed" strokeWidth="1"/>
-    <line x1="464" y1="177" x2="572" y2="315" stroke="#a855f7" strokeWidth="1.5" strokeDasharray="4,3"/>
-    <rect x="320" y={420} width={155} height={34} rx="5" fill="#06060a" stroke="#f59e0b" strokeWidth="1.5" strokeDasharray="5,3"/>
-    <text x="397" y="437" textAnchor="middle" fill="#f59e0b" fontSize="9" fontFamily="monospace" fontWeight="bold">AREA 10 — MGMT</text>
-    <text x="397" y="449" textAnchor="middle" fill="#7a5a00" fontSize="7" fontFamily="monospace">OOB · VLAN999</text>
-  </SvgWrap>;
-}
+Northbound API: Controller ↔ Applications (REST/JSON)
+Southbound API: Controller ↔ Devices (OpenFlow, NETCONF)` },
+      { title:"1.2 Cisco APIC-EM", content:`Cisco Application Policy Infrastructure Controller Enterprise Module
 
-function TopoBGP(){
-  return <SvgWrap>
-    {[{x:25,l:"ISP-A",s:"AS 100"},{x:610,l:"ISP-B",s:"AS 200"}].map((n,i)=>(
-      <g key={i}><rect x={n.x} y={30} width={165} height={55} rx="8" fill="#0f0500" stroke="#ff6b35" strokeWidth="2"/>
-      <text x={n.x+82} y={53} textAnchor="middle" fill="#ff6b35" fontSize="12" fontFamily="monospace" fontWeight="bold">{n.l}</text>
-      <text x={n.x+82} y={70} textAnchor="middle" fill="#8a3000" fontSize="9" fontFamily="monospace">{n.s}</text></g>
-    ))}
-    {[{x:110,l:"EDGE-R1",s1:"AS 65001",s2:"LP:200 Primary"},{x:470,l:"EDGE-R2",s1:"AS 65001",s2:"LP:100+Prepend×3"}].map((n,i)=>(
-      <g key={i}><rect x={n.x} y={160} width={165} height={68} rx="9" fill="#041520" stroke="#00d4ff" strokeWidth="2.5"/>
-      <text x={n.x+82} y={182} textAnchor="middle" fill="#00d4ff" fontSize="12" fontFamily="monospace" fontWeight="bold">{n.l}</text>
-      <text x={n.x+82} y={200} textAnchor="middle" fill="#1a7a9a" fontSize="15" fontFamily="monospace">{n.s1}</text>
-      <text x={n.x+82} y={218} textAnchor="middle" fill="#0a4a6a" fontSize="8" fontFamily="monospace">{n.s2}</text></g>
-    ))}
-    <line x1="190" y1="85" x2="185" y2="160" stroke="#ff6b35" strokeWidth="2"/>
-    <line x1="618" y1="85" x2="610" y2="160" stroke="#ff6b35" strokeWidth="2"/>
-    <text x="160" y="128" fill="#ff6b35" fontSize="9" fontFamily="monospace">eBGP</text>
-    <text x="618" y="128" fill="#ff6b35" fontSize="9" fontFamily="monospace">eBGP</text>
-    <line x1="275" y1="194" x2="470" y2="194" stroke="#00d4ff" strokeWidth="1.5" strokeDasharray="6,3"/>
-    <text x="400" y="188" textAnchor="middle" fill="#00d4ff" fontSize="9" fontFamily="monospace">iBGP (next-hop-self)</text>
-    <rect x="278" y={300} width={244} height={50} rx="8" fill="#040e08" stroke="#10b981" strokeWidth="2"/>
-    <text x="400" y="320" textAnchor="middle" fill="#10b981" fontSize="15" fontFamily="monospace" fontWeight="bold">OUR PREFIX: 2001:db8::/32</text>
-    <text x="400" y="340" textAnchor="middle" fill="#1a6a3a" fontSize="8" fontFamily="monospace">→ ISP-A (primary) & ISP-B (backup)</text>
-    <line x1="240" y1="228" x2="325" y2="300" stroke="#10b981" strokeWidth="1.5" strokeDasharray="4,2"/>
-    <line x1="560" y1="228" x2="475" y2="300" stroke="#10b981" strokeWidth="1.5" strokeDasharray="4,2"/>
-    <text x="400" y="400" textAnchor="middle" fill="#f59e0b" fontSize="9" fontFamily="monospace">ISP-A Primary (LP=200) → Failover ISP-B (LP=100 + Prepend×3)</text>
-  </SvgWrap>;
-}
+Chức năng:
+• Network Discovery: Tự động khám phá thiết bị qua SNMP/CDP
+• Path Trace: Phân tích đường truyền giữa 2 điểm
+• ACL Analysis: Kiểm tra và debug ACLs
+• EasyQoS: Tự động cấu hình QoS
+• Topology Viewer: Bản đồ mạng visual
 
-function TopoMcast(){
-  return <SvgWrap>
-    <rect x="305" y="12" width="190" height="46" rx="8" fill="#100a00" stroke="#f59e0b" strokeWidth="2"/>
-    <text x="400" y="32" textAnchor="middle" fill="#f59e0b" fontSize="11" fontFamily="monospace" fontWeight="bold">📹 VIDEO SOURCE</text>
-    <text x="400" y="50" textAnchor="middle" fill="#7a5a00" fontSize="8" fontFamily="monospace">2001:db8:1:20::100</text>
-    {[{x:305,l:"CORE-R1 (RP)",s1:"Anycast RP Primary",c:"#ff6b35"},{x:482,l:"CORE-R2 (BSR)",s1:"BSR Priority:100",c:"#a855f7"}].map((n,i)=>(
-      <g key={i}><rect x={n.x} y={122} width={165} height={52} rx="8" fill={i===0?"#0f0500":"#0a0818"} stroke={n.c} strokeWidth="2"/>
-      <text x={n.x+82} y={143} textAnchor="middle" fill={n.c} fontSize="15" fontFamily="monospace" fontWeight="bold">{n.l}</text>
-      <text x={n.x+82} y={160} textAnchor="middle" fill={n.c} fontSize="8" fontFamily="monospace">{n.s1}</text></g>
-    ))}
-    <line x1="400" y1="58" x2="388" y2="122" stroke="#f59e0b" strokeWidth="2" strokeDasharray="4,2"/>
-    <line x1="470" y1="148" x2="482" y2="148" stroke="#a855f7" strokeWidth="1.5"/>
-    {[{x:85,l:"DIST-SW1"},{x:412,l:"DIST-SW2"}].map((n,i)=>(
-      <g key={i}><rect x={n.x} y={250} width={130} height={38} rx="6" fill="#040e0a" stroke="#10b981" strokeWidth="1.5"/>
-      <text x={n.x+65} y={268} textAnchor="middle" fill="#10b981" fontSize="9" fontFamily="monospace" fontWeight="bold">{n.l}</text>
-      <text x={n.x+65} y={282} textAnchor="middle" fill="#1a5a2a" fontSize="7" fontFamily="monospace">PIM-SM · MLDv2</text></g>
-    ))}
-    <line x1="360" y1="174" x2="205" y2="250" stroke="#ff6b35" strokeWidth="1.5"/>
-    <line x1="393" y1="174" x2="446" y2="250" stroke="#ff6b35" strokeWidth="1.5"/>
-    {[{x:22,l:"VLAN10"},{x:148,l:"VLAN20"},{x:388,l:"VoIP/MoH"},{x:508,l:"VLAN20"}].map((n,i)=>(
-      <g key={i}><rect x={n.x} y={354} width={110} height={52} rx="5" fill="#030808" stroke={i===2?"#a855f7":"#00d4ff"} strokeWidth="1"/>
-      <text x={n.x+55} y={373} textAnchor="middle" fill={i===2?"#a855f7":"#00d4ff"} fontSize="9" fontFamily="monospace">{n.l}</text>
-      <text x={n.x+55} y={390} textAnchor="middle" fill={i===2?"#a855f7":"#00d4ff"} fontSize="7" fontFamily="monospace">MLDv2 Join</text>
-      <text x={n.x+55} y={402} textAnchor="middle" fill={i===2?"#a855f7":"#00d4ff"} fontSize="7" fontFamily="monospace">FF1E::STREAM</text></g>
-    ))}
-    <line x1="138" y1="288" x2="100" y2="354" stroke="#00d4ff" strokeWidth="1"/>
-    <line x1="165" y1="288" x2="200" y2="354" stroke="#00d4ff" strokeWidth="1"/>
-    <line x1="448" y1="288" x2="432" y2="354" stroke="#00d4ff" strokeWidth="1"/>
-    <line x1="470" y1="288" x2="548" y2="354" stroke="#a855f7" strokeWidth="1"/>
-    <rect x="622" y={248} width={160} height={108} rx="6" fill="#040a04" stroke="#10b981" strokeWidth="1" strokeDasharray="3,2"/>
-    <text x="702" y="266" textAnchor="middle" fill="#10b981" fontSize="9" fontFamily="monospace" fontWeight="bold">PIM-SM FLOW</text>
-    {["1. Receiver joins (MLD)","2. PIM Join → RP","3. Source register","4. SPT switchover","5. Native delivery"].map((s,i)=>(
-      <text key={i} x="702" y={282+i*15} textAnchor="middle" fill="#1a5a2a" fontSize="7" fontFamily="monospace">{s}</text>
-    ))}
-  </SvgWrap>;
-}
+REST API APIC-EM:
+Base URL: https://sandboxapicem.cisco.com
+Auth: POST /api/v1/ticket → ServiceTicket
+Headers: X-Auth-Token: <ticket>
 
-function TopoVoIP(){
-  return <SvgWrap>
-    <ellipse cx="110" cy="70" rx="90" ry="36" fill="#0f0505" stroke="#ff4444" strokeWidth="1.5"/>
-    <text x="110" y="65" textAnchor="middle" fill="#ff4444" fontSize="11" fontFamily="monospace" fontWeight="bold">☎ PSTN</text>
-    <text x="110" y="82" textAnchor="middle" fill="#7a2222" fontSize="8" fontFamily="monospace">FXO/T1/E1</text>
-    {[{x:195,l:"CME-GW",s1:"Cisco ISR 2911",s2:"2001:db8:5:1::1",c:"#00d4ff"},{x:425,l:"FreePBX",s1:"Asterisk 21",s2:"2001:db8:5:2::2",c:"#a855f7"}].map((n,i)=>(
-      <g key={i}><rect x={n.x} y={130} width={175} height={80} rx="9" fill={i===0?"#041a08":"#0a0418"} stroke={n.c} strokeWidth="2.5"/>
-      <text x={n.x+87} y={153} textAnchor="middle" fill={n.c} fontSize="12" fontFamily="monospace" fontWeight="bold">{n.l}</text>
-      <text x={n.x+87} y={170} textAnchor="middle" fill={n.c} fontSize="9" fontFamily="monospace">{n.s1}</text>
-      <text x={n.x+87} y={186} textAnchor="middle" fill={n.c} fontSize="8" fontFamily="monospace">{n.s2}</text>
-      <text x={n.x+87} y={202} textAnchor="middle" fill={n.c} fontSize="7" fontFamily="monospace">{i===0?"SCCP/SIP · CME 15.x":"PJSIP · IVR · CDR"}</text></g>
-    ))}
-    <line x1="370" y1="170" x2="425" y2="170" stroke="#10b981" strokeWidth="2.5"/>
-    <text x="397" y="163" textAnchor="middle" fill="#10b981" fontSize="9" fontFamily="monospace">SIP Trunk</text>
-    <line x1="178" y1="88" x2="230" y2="130" stroke="#ff4444" strokeWidth="1.5"/>
-    {[1001,1002,1003,1004].map((ext,i)=>(
-      <g key={ext}><rect x={62+i*90} y={290} width={80} height={52} rx="5" fill="#040810" stroke="#00d4ff" strokeWidth="1"/>
-      <text x={62+i*90+40} y={312} textAnchor="middle" fill="#00d4ff" fontSize="13">📱</text>
-      <text x={62+i*90+40} y={328} textAnchor="middle" fill="#1a6a8e" fontSize="8" fontFamily="monospace">Ext:{ext}</text>
-      <text x={62+i*90+40} y={338} textAnchor="middle" fill="#0a3a5e" fontSize="7" fontFamily="monospace">7962G</text>
-      <line x1={62+i*90+40} y1={290} x2={280} y2={210} stroke="#00d4ff" strokeWidth="0.7" strokeDasharray="3,2" opacity="0.4"/></g>
-    ))}
-    {[2001,2002,2003].map((ext,i)=>(
-      <g key={ext}><rect x={430+i*110} y={290} width={96} height={52} rx="5" fill="#06040e" stroke="#a855f7" strokeWidth="1"/>
-      <text x={430+i*110+48} y={312} textAnchor="middle" fill="#a855f7" fontSize="13">💻</text>
-      <text x={430+i*110+48} y={328} textAnchor="middle" fill="#6a2ab5" fontSize="8" fontFamily="monospace">Ext:{ext}</text>
-      <text x={430+i*110+48} y={338} textAnchor="middle" fill="#3a007e" fontSize="7" fontFamily="monospace">Softphone</text>
-      <line x1={430+i*110+48} y1={290} x2={510} y2={210} stroke="#a855f7" strokeWidth="0.7" strokeDasharray="3,2" opacity="0.4"/></g>
-    ))}
-    <rect x="170" y="372" width="460" height="46" rx="6" fill="#040a04" stroke="#10b981" strokeWidth="1.5"/>
-    <text x="400" y="391" textAnchor="middle" fill="#10b981" fontSize="9" fontFamily="monospace" fontWeight="bold">DIAL PLAN</text>
-    <text x="400" y="410" textAnchor="middle" fill="#6a9a8a" fontSize="8" fontFamily="monospace">1XXX→CME | 2XXX→FreePBX | 0.→PSTN | 9000→IVR | 6000→Conf</text>
-  </SvgWrap>;
-}
+Workflow:
+1. Lấy Service Ticket (auth)
+2. GET /api/v1/network-device → device list  
+3. GET /api/v1/topology/physical-topology → topology
+4. POST /api/v1/flow-analysis → path trace` },
+      { title:"1.3 Mininet", content:`Mininet: Network Emulator cho SDN Research
 
-const TMAP={full:TopoFull,ospf:TopoOSPF,bgp:TopoBGP,mcast:TopoMcast,voip:TopoVoIP};
+Cài đặt:
+sudo apt-get install mininet
+sudo mn --test pingall
 
-export default function App(){
-  const [view,setView]=useState("modules");
-  const [topo,setTopo]=useState("full");
-  const [expMod,setExpMod]=useState(null);
-  const [expLab,setExpLab]=useState(null);
-  const [labTab,setLabTab]=useState("deploy");
-  const [expThesis,setExpThesis]=useState(null);
-  const [thesisTab,setThesisTab]=useState("overview");
-  const [filter,setFilter]=useState("all");
-  const TopoComp=TMAP[topo];
-  const filtered=filter==="all"?THESIS:THESIS.filter(t=>t.level===filter);
-  const [loggedIn, setLoggedIn] = useState(false);
+Tạo topology:
+from mininet.net import Mininet
+from mininet.topo import Topo
 
-  useEffect(() => {
-    const auth = localStorage.getItem("auth");
-    if (auth === "true") {
-      setLoggedIn(true);
+class MyTopo(Topo):
+    def build(self):
+        s1 = self.addSwitch('s1')
+        h1 = self.addHost('h1')
+        h2 = self.addHost('h2')
+        self.addLink(h1, s1)
+        self.addLink(h2, s1)
+
+net = Mininet(topo=MyTopo())
+net.start()
+net.pingAll()
+net.stop()
+
+Kết nối với OpenFlow controller:
+sudo mn --controller=remote,ip=127.0.0.1,port=6633 --topo=tree,2` },
+      { title:"1.4 Giao thức OpenFlow", content:`OpenFlow: Southbound Protocol SDN
+
+Phiên bản: 1.0, 1.3 (phổ biến nhất)
+
+Flow Table Entry:
+┌──────────┬──────────┬──────────────┐
+│ Match    │ Priority │ Instructions │
+│ Fields   │          │ (Actions)    │
+├──────────┼──────────┼──────────────┤
+│ in_port  │  65535   │ output:port  │
+│ eth_dst  │          │ drop         │
+│ ip_src   │          │ goto_table   │
+│ tcp_dst  │          │ send_controller│
+└──────────┴──────────┴──────────────┘
+
+OpenFlow Messages:
+• Hello: Thiết lập kết nối
+• Features Request/Reply: Lấy thông tin switch
+• Packet-In: Switch gửi packet lên controller
+• Flow-Mod: Controller cài flow rules
+• Stats Request/Reply: Lấy thống kê
+
+Controller-Switch Communication:
+TCP Port: 6633 (OF 1.0), 6653 (OF 1.3)` }
+    ],
+    labs:[
+      { num:"L1.1", name:"Cài đặt Mininet & Khám phá", dur:"90 phút", diff:1,
+        steps:["sudo apt-get update && apt-get install mininet","sudo mn --test pingall","sudo mn --topo linear,3 --mac","h1 ping h2 -c 3","dpctl dump-flows","Vẽ topology trên giấy"],
+        code:`# Tạo simple topology
+sudo mn --topo single,3
+
+# Trong Mininet CLI:
+mininet> nodes
+mininet> links
+mininet> h1 ping h2
+mininet> pingall
+mininet> iperf h1 h2
+mininet> h1 ifconfig
+mininet> sh ovs-ofctl dump-flows s1`,
+        result:["Mininet chạy thành công","pingall: 100% packets received","Flow table hiển thị entries","Topology được vẽ đúng"]
+      },
+      { num:"L1.2", name:"OpenFlow Controller với Ryu", dur:"120 phút", diff:2,
+        steps:["pip install ryu","Viết SimpleSwitch controller","ryu-manager simple_switch.py","Kết nối Mininet với Ryu","Test packet forwarding","Kiểm tra flow tables"],
+        code:`# simple_switch.py
+from ryu.base import app_manager
+from ryu.controller import ofp_event
+from ryu.controller.handler import MAIN_DISPATCHER
+from ryu.controller.handler import set_ev_cls
+from ryu.ofproto import ofproto_v1_0
+
+class SimpleSwitch(app_manager.RyuApp):
+    OFP_VERSIONS = [ofproto_v1_0.OFP_VERSION]
+    
+    def __init__(self, *args, **kwargs):
+        super(SimpleSwitch, self).__init__(*args, **kwargs)
+        self.mac_to_port = {}
+    
+    @set_ev_cls(ofp_event.EventOFPPacketIn, MAIN_DISPATCHER)
+    def packet_in_handler(self, ev):
+        msg = ev.msg
+        dp = msg.datapath
+        ofp = dp.ofproto
+        ofp_parser = dp.ofproto_parser
+        in_port = msg.in_port
+        # Learn MAC
+        # Forward or flood
+        ...
+
+# Chạy:
+# Terminal 1: ryu-manager simple_switch.py
+# Terminal 2: sudo mn --controller=remote,ip=127.0.0.1`,
+        result:["Ryu controller chạy","Mininet kết nối controller","Ping thành công qua SDN","Flow rules được cài tự động"]
+      }
+    ]
+  },
+  {
+    id:2, icon:"🐍", color:"#4ade80", title:"PYTHON & JSON CHO MẠNG",
+    desc:"Lập trình Python, xử lý JSON và sử dụng REST API để quản lý thiết bị mạng.",
+    theory:[
+      { title:"2.1 Python cơ bản cho Network", content:`Python Network Programming Basics
+
+Data Types:
+• str: "192.168.1.1", "GigabitEthernet0/0"
+• list: [device1, device2, device3]
+• dict: {"ip": "10.0.0.1", "type": "router"}
+• tuple: (hostname, ip, port)
+
+Cấu trúc điều khiển:
+devices = ["R1", "R2", "SW1"]
+for device in devices:
+    if device.startswith("R"):
+        print(f"Router: {device}")
+    else:
+        print(f"Switch: {device}")
+
+Functions:
+def get_device_info(hostname, ip):
+    return {
+        "hostname": hostname,
+        "ip": ip,
+        "reachable": ping_test(ip)
     }
-  }, []);
 
-  if (!loggedIn) {
-    return <Login onLogin={()=>setLoggedIn(true)} />;
+File I/O:
+import json
+with open("topology.json", "r") as f:
+    data = json.load(f)
+
+with open("output.json", "w") as f:
+    json.dump(data, f, indent=2)` },
+      { title:"2.2 JSON & REST API", content:`JSON Format & REST API Usage
+
+JSON Structure:
+{
+  "devices": [
+    {
+      "id": "router-1",
+      "hostname": "EDGE-R1",
+      "ip": "192.168.1.1",
+      "type": "Cisco IOS",
+      "interfaces": [
+        {"name": "Gi0/0", "ip": "10.0.0.1", "status": "up"},
+        {"name": "Gi0/1", "ip": "10.0.0.2", "status": "up"}
+      ]
+    }
+  ]
+}
+
+Python requests Library:
+import requests
+import json
+
+# GET Request
+url = "https://api.example.com/devices"
+headers = {"Content-Type": "application/json",
+           "X-Auth-Token": "your_token"}
+
+response = requests.get(url, headers=headers, verify=False)
+if response.status_code == 200:
+    data = response.json()
+    for device in data["response"]:
+        print(device["hostname"], device["managementIpAddress"])
+
+# POST Request  
+payload = {"username": "admin", "password": "password"}
+r = requests.post(url + "/ticket", json=payload, verify=False)
+ticket = r.json()["response"]["serviceTicket"]` },
+      { title:"2.3 Postman Tool", content:`Postman: API Testing và Development
+
+Workflow với APIC-EM:
+1. GET Service Ticket:
+   POST https://sandboxapicem.cisco.com/api/v1/ticket
+   Body: {"username":"devnetuser","password":"Cisco123!"}
+   → Copy serviceTicket value
+
+2. List Devices:
+   GET https://sandboxapicem.cisco.com/api/v1/network-device
+   Header: X-Auth-Token: <ticket>
+
+3. Get Topology:
+   GET /api/v1/topology/physical-topology
+
+4. Path Trace:
+   POST /api/v1/flow-analysis
+   Body: {"sourceIP":"10.10.22.98","destIP":"10.10.22.114"}
+
+Postman Collections:
+• Tạo Collection "APIC-EM Lab"
+• Add Requests: Auth, Devices, Topology, PathTrace
+• Set Environment Variables: {{base_url}}, {{token}}
+• Run Collection với Newman` }
+    ],
+    labs:[
+      { num:"L2.1", name:"Python JSON Processing", dur:"90 phút", diff:1,
+        steps:["Cài đặt Python 3.x + pip","Tạo JSON file thiết bị mạng","Viết script đọc và parse JSON","Filter devices theo type/status","Export kết quả ra CSV"],
+        code:`import json
+import csv
+
+# Đọc topology JSON
+with open("network_topology.json") as f:
+    topology = json.load(f)
+
+# Filter routers
+routers = [d for d in topology["devices"] 
+           if d["type"] == "router"]
+
+# In thông tin
+for r in routers:
+    print(f"Hostname: {r['hostname']}")
+    print(f"  IP: {r['managementIp']}")
+    for intf in r.get("interfaces", []):
+        status = "✓" if intf["status"]=="up" else "✗"
+        print(f"  {status} {intf['name']}: {intf['ip']}")
+
+# Export CSV
+with open("routers.csv", "w", newline="") as f:
+    writer = csv.writer(f)
+    writer.writerow(["Hostname","IP","Interfaces"])
+    for r in routers:
+        writer.writerow([r["hostname"], 
+                         r["managementIp"],
+                         len(r.get("interfaces",[]))])`,
+        result:["Script chạy không lỗi","JSON parse thành công","Filter đúng device type","CSV export đọc được trong Excel"]
+      },
+      { num:"L2.2", name:"REST API với Postman", dur:"120 phút", diff:2,
+        steps:["Cài Postman","Tạo Collection APIC-EM","POST lấy Service Ticket","GET danh sách network devices","GET physical topology","Export Collection để nộp bài"],
+        code:`# Tương đương Python:
+import requests
+requests.packages.urllib3.disable_warnings()
+
+BASE_URL = "https://sandboxapicem.cisco.com"
+
+# Bước 1: Lấy token
+auth_data = {
+    "username": "devnetuser",
+    "password": "Cisco123!"
+}
+r = requests.post(
+    f"{BASE_URL}/api/v1/ticket",
+    json=auth_data, verify=False
+)
+token = r.json()["response"]["serviceTicket"]
+print(f"Token: {token[:20]}...")
+
+# Bước 2: Lấy devices  
+headers = {"X-Auth-Token": token,
+           "Content-Type": "application/json"}
+r = requests.get(
+    f"{BASE_URL}/api/v1/network-device",
+    headers=headers, verify=False
+)
+devices = r.json()["response"]
+print(f"Total devices: {len(devices)}")
+for d in devices:
+    print(f"  {d['hostname']} - {d['managementIpAddress']}")`,
+        result:["Service Ticket nhận được","Device list trả về JSON","Topology data parsed","Python script reproduce kết quả Postman"]
+      }
+    ]
+  },
+  {
+    id:3, icon:"🔌", color:"#fb923c", title:"BỘ ĐIỀU KHIỂN MẠNG TẬP TRUNG",
+    desc:"Kết nối và điều khiển bộ điều khiển mạng qua Postman và Python.",
+    theory:[
+      { title:"3.1 Service Ticket & Authentication", content:`APIC-EM Authentication Flow
+
+Token-Based Auth:
+1. Client gửi credentials → POST /api/v1/ticket
+2. Server trả về serviceTicket (JWT-like)
+3. Client dùng token trong header mọi request
+4. Token hết hạn sau 1 giờ (default)
+
+Security:
+• HTTPS only (TLS 1.2+)
+• Token rotation
+• Role-based access: SUPER-ADMIN, ADMIN, OBSERVER
+
+Python với Environment Variables:
+import os
+import requests
+
+BASE_URL = os.getenv("APIC_BASE_URL")
+USERNAME = os.getenv("APIC_USER") 
+PASSWORD = os.getenv("APIC_PASS")
+
+def get_token():
+    url = f"{BASE_URL}/api/v1/ticket"
+    payload = {"username": USERNAME, "password": PASSWORD}
+    r = requests.post(url, json=payload, verify=False)
+    r.raise_for_status()
+    return r.json()["response"]["serviceTicket"]
+
+def api_get(endpoint, token):
+    headers = {"X-Auth-Token": token,
+               "Content-Type": "application/json"}
+    r = requests.get(f"{BASE_URL}{endpoint}", 
+                     headers=headers, verify=False)
+    return r.json()` },
+      { title:"3.2 Network Discovery & Inventory", content:`Network Device Inventory via API
+
+Device Properties:
+{
+  "id": "uuid",
+  "hostname": "CORE-R1",
+  "managementIpAddress": "10.10.22.74",
+  "platformId": "cisco Catalyst 3850",
+  "softwareVersion": "16.6.4a",
+  "type": "Cisco Catalyst 3850 Series...",
+  "role": "DISTRIBUTION",
+  "reachabilityStatus": "Reachable",
+  "upTime": "14 days, 3:21:05.98",
+  "interfaceCount": "48",
+  "lineCardCount": "1"
+}
+
+Lọc và phân tích devices:
+def analyze_inventory(devices):
+    summary = {
+        "routers": [], "switches": [],
+        "unreachable": []
+    }
+    for d in devices:
+        if "router" in d["type"].lower():
+            summary["routers"].append(d)
+        elif "switch" in d["type"].lower():
+            summary["switches"].append(d)
+        if d["reachabilityStatus"] != "Reachable":
+            summary["unreachable"].append(d["hostname"])
+    return summary` }
+    ],
+    labs:[
+      { num:"L3.1", name:"Thu thập thông tin mạng", dur:"120 phút", diff:2,
+        steps:["Lấy Service Ticket","GET /network-device → lưu JSON","Parse và hiển thị hostname, IP, type","Filter theo reachabilityStatus","Tạo báo cáo inventory text/CSV","Visualize topology đơn giản"],
+        code:`import requests
+import json
+from datetime import datetime
+requests.packages.urllib3.disable_warnings()
+
+class APICEMClient:
+    def __init__(self, base_url, username, password):
+        self.base_url = base_url
+        self.token = self._get_token(username, password)
+    
+    def _get_token(self, username, password):
+        r = requests.post(
+            f"{self.base_url}/api/v1/ticket",
+            json={"username": username, "password": password},
+            verify=False
+        )
+        return r.json()["response"]["serviceTicket"]
+    
+    def get_devices(self):
+        r = requests.get(
+            f"{self.base_url}/api/v1/network-device",
+            headers={"X-Auth-Token": self.token},
+            verify=False
+        )
+        return r.json()["response"]
+    
+    def get_topology(self):
+        r = requests.get(
+            f"{self.base_url}/api/v1/topology/physical-topology",
+            headers={"X-Auth-Token": self.token},
+            verify=False
+        )
+        return r.json()["response"]
+
+# Sử dụng
+client = APICEMClient(
+    "https://sandboxapicem.cisco.com",
+    "devnetuser", "Cisco123!"
+)
+devices = client.get_devices()
+print(f"📊 Inventory Report - {datetime.now()}")
+print(f"Total: {len(devices)} devices")`,
+        result:["APICEMClient class hoạt động","Device list đầy đủ","Báo cáo inventory xuất được","CSV/JSON file đúng format"]
+      }
+    ]
+  },
+  {
+    id:4, icon:"📊", color:"#c084fc", title:"THU THẬP THÔNG TIN NÚT MẠNG",
+    desc:"Sử dụng Postman và Python để thu thập thông tin chi tiết từ các nút mạng.",
+    theory:[
+      { title:"4.1 Device Details & Interfaces", content:`Thu thập thông tin chi tiết thiết bị
+
+Interface Details:
+GET /api/v1/interface/network-device/{deviceId}
+
+Response:
+{
+  "portName": "GigabitEthernet1/0/1",
+  "ipv4Address": "10.0.0.1",
+  "ipv4Mask": "255.255.255.0",
+  "status": "up",
+  "speed": "1000000",
+  "duplex": "FullDuplex",
+  "vlanId": "100",
+  "macAddress": "00:11:22:33:44:55"
+}
+
+Module thông tin:
+GET /api/v1/network-device/{id}/equipment
+GET /api/v1/network-device/{id}/functional-capability
+
+Neighbor Discovery:
+GET /api/v1/topology/physical-topology
+→ nodes: [{id, label, ip, deviceType}]
+→ links: [{source, target, startPortName, endPortName}]` },
+      { title:"4.2 Path Trace Analysis", content:`Flow Analysis & Path Trace
+
+POST /api/v1/flow-analysis
+{
+  "sourceIP": "10.10.22.98",
+  "destIP": "10.10.22.114",
+  "sourcePort": "80",
+  "destPort": "80",
+  "protocol": "tcp",
+  "inclusions": ["INTERFACE-STATS","QOS-STATS","ACL-TRACE"]
+}
+
+Response: flowAnalysisId → Poll status
+
+GET /api/v1/flow-analysis/{id}
+→ networkElementsInfo[]: path hops
+  → name: device name
+  → ip: device IP  
+  → egressInterface: {name, ip}
+  → ingressInterface: {name, ip}
+  → perfMonStatistics: {bytesRate, packetLoss}
+
+Visualize Path:
+Source(10.10.22.98)
+  → AccessSW1 [Gi1/0/1 → Gi1/0/24]
+  → DistSW1   [Gi1/0/1 → Gi1/0/2]  
+  → CoreR1    [Gi0/0   → Gi0/1]
+  → Dest(10.10.22.114)` }
+    ],
+    labs:[
+      { num:"L4.1", name:"Device Profile Builder", dur:"120 phút", diff:2,
+        steps:["Lấy danh sách tất cả devices","Với mỗi device: GET interfaces","Tạo profile dict đầy đủ","Lưu vào JSON database","Query: tìm device theo IP","Tạo báo cáo HTML đơn giản"],
+        code:`def build_device_profiles(client):
+    devices = client.get_devices()
+    profiles = []
+    
+    for device in devices:
+        device_id = device["id"]
+        
+        # Lấy interfaces
+        r = requests.get(
+            f"{client.base_url}/api/v1/interface/network-device/{device_id}",
+            headers={"X-Auth-Token": client.token},
+            verify=False
+        )
+        interfaces = r.json().get("response", [])
+        
+        profile = {
+            "hostname": device["hostname"],
+            "ip": device["managementIpAddress"],
+            "type": device["type"],
+            "software": device["softwareVersion"],
+            "uptime": device["upTime"],
+            "interfaces": [
+                {
+                    "name": i["portName"],
+                    "ip": i.get("ipv4Address","N/A"),
+                    "status": i["status"],
+                    "speed": i.get("speed","N/A")
+                }
+                for i in interfaces
+            ]
+        }
+        profiles.append(profile)
+    
+    return profiles
+
+profiles = build_device_profiles(client)
+with open("device_profiles.json", "w") as f:
+    json.dump(profiles, f, indent=2)
+print(f"Saved {len(profiles)} device profiles")`,
+        result:["Profile JSON cho mỗi device","Interface details đầy đủ","JSON database query hoạt động","HTML report hiển thị đẹp"]
+      }
+    ]
+  },
+  {
+    id:5, icon:"🕸️", color:"#f472b6", title:"LIÊN KẾT THIẾT BỊ & BỘ ĐIỀU KHIỂN",
+    desc:"Xây dựng ứng dụng hoàn chỉnh quản lý mạng qua SDN controller API.",
+    theory:[
+      { title:"5.1 Network Topology Visualization", content:`Hiển thị Topology Mạng qua API
+
+Lấy dữ liệu topology:
+GET /api/v1/topology/physical-topology
+
+Cấu trúc response:
+{
+  "nodes": [
+    {"id": "uuid1", "label": "CORE-R1", 
+     "ip": "10.10.22.74", "nodeType": "ROUTER",
+     "x": 120.5, "y": 250.3}
+  ],
+  "links": [
+    {"source": "uuid1", "target": "uuid2",
+     "startPortName": "Gi0/0", "endPortName": "Gi1/0/1",
+     "linkStatus": "UP"}
+  ]
+}
+
+Python → Text Topology:
+def print_topology(topo_data):
+    nodes = {n["id"]: n["label"] 
+             for n in topo_data["nodes"]}
+    print("=== NETWORK TOPOLOGY ===")
+    for link in topo_data["links"]:
+        src = nodes.get(link["source"], "?")
+        dst = nodes.get(link["target"], "?")
+        status = "✓" if link["linkStatus"]=="UP" else "✗"
+        print(f"{status} {src}[{link['startPortName']}]"
+              f" ─── {dst}[{link['endPortName']}]")` },
+      { title:"5.2 Kiểm Thử Kết Nối", content:`End-to-End Connectivity Testing
+
+Path Trace Application:
+def check_connectivity(client, src_ip, dst_ip):
+    # Khởi tạo path trace
+    payload = {
+        "sourceIP": src_ip,
+        "destIP": dst_ip,
+        "inclusions": ["ACL-TRACE","INTERFACE-STATS"]
+    }
+    r = requests.post(
+        f"{client.base_url}/api/v1/flow-analysis",
+        json=payload,
+        headers={"X-Auth-Token": client.token},
+        verify=False
+    )
+    flow_id = r.json()["response"]["flowAnalysisId"]
+    
+    # Poll kết quả
+    import time
+    for _ in range(10):
+        time.sleep(2)
+        r = requests.get(
+            f"{client.base_url}/api/v1/flow-analysis/{flow_id}",
+            headers={"X-Auth-Token": client.token},
+            verify=False
+        )
+        result = r.json()["response"]
+        if result["request"]["status"] == "COMPLETED":
+            return result
+    return None
+
+Kết quả:
+• Path: danh sách hops
+• ACL hits: có bị chặn không
+• Interface stats: packet loss, latency` }
+    ],
+    labs:[
+      { num:"L5.1", name:"Ứng Dụng Quản Lý Mạng", dur:"180 phút", diff:3,
+        steps:["Xây dựng class APICEMClient đầy đủ","Implement: discover, inventory, topology","Implement: path_trace, connectivity_check","Thêm error handling và retry","Tạo CLI menu interface","Demo trước lớp"],
+        code:`#!/usr/bin/env python3
+"""
+Network Management Application
+Chuyên Đề Mạng Máy Tính 1 - DLU
+"""
+import requests
+import json
+import time
+requests.packages.urllib3.disable_warnings()
+
+class NetworkManager:
+    def __init__(self):
+        self.BASE_URL = "https://sandboxapicem.cisco.com"
+        self.token = None
+        self.devices = []
+        self.topology = {}
+    
+    def login(self, username, password):
+        r = requests.post(
+            f"{self.BASE_URL}/api/v1/ticket",
+            json={"username": username, "password": password},
+            verify=False
+        )
+        self.token = r.json()["response"]["serviceTicket"]
+        print("✓ Đăng nhập thành công")
+    
+    def discover_devices(self):
+        r = requests.get(
+            f"{self.BASE_URL}/api/v1/network-device",
+            headers={"X-Auth-Token": self.token},
+            verify=False
+        )
+        self.devices = r.json()["response"]
+        print(f"✓ Phát hiện {len(self.devices)} thiết bị")
+        return self.devices
+    
+    def show_inventory(self):
+        print("\\n=== NETWORK INVENTORY ===")
+        for i, d in enumerate(self.devices, 1):
+            status = "🟢" if d["reachabilityStatus"]=="Reachable" else "🔴"
+            print(f"{i:2}. {status} {d['hostname']:20} {d['managementIpAddress']:15} {d['type'][:30]}")
+    
+    def get_topology(self):
+        r = requests.get(
+            f"{self.BASE_URL}/api/v1/topology/physical-topology",
+            headers={"X-Auth-Token": self.token},
+            verify=False
+        )
+        self.topology = r.json()["response"]
+        self.show_topology()
+    
+    def show_topology(self):
+        nodes = {n["id"]: n["label"] for n in self.topology.get("nodes",[])}
+        print("\\n=== TOPOLOGY LINKS ===")
+        for link in self.topology.get("links",[]):
+            src = nodes.get(link["source"],"?")
+            dst = nodes.get(link["target"],"?")
+            status = "UP" if link.get("linkStatus")=="UP" else "DOWN"
+            print(f"  {src} ──[{status}]── {dst}")
+    
+    def check_path(self, src_ip, dst_ip):
+        print(f"\\n🔍 Path trace: {src_ip} → {dst_ip}")
+        payload = {"sourceIP": src_ip, "destIP": dst_ip}
+        r = requests.post(
+            f"{self.BASE_URL}/api/v1/flow-analysis",
+            json=payload,
+            headers={"X-Auth-Token": self.token},
+            verify=False
+        )
+        flow_id = r.json()["response"]["flowAnalysisId"]
+        for _ in range(10):
+            time.sleep(2)
+            r = requests.get(
+                f"{self.BASE_URL}/api/v1/flow-analysis/{flow_id}",
+                headers={"X-Auth-Token": self.token},
+                verify=False
+            )
+            data = r.json()["response"]
+            if data["request"]["status"] == "COMPLETED":
+                hops = data.get("networkElementsInfo",[])
+                print(f"  Path ({len(hops)} hops):")
+                for h in hops:
+                    print(f"  → {h.get('name','?')} [{h.get('ip','?')}]")
+                return
+        print("  ⚠ Path trace timeout")
+
+# Main
+mgr = NetworkManager()
+mgr.login("devnetuser", "Cisco123!")
+mgr.discover_devices()
+mgr.show_inventory()
+mgr.get_topology()
+mgr.check_path("10.10.22.98", "10.10.22.114")`,
+        result:["App chạy end-to-end","Inventory hiển thị đầy đủ","Topology in ra dạng text","Path trace trả về đường đi","Demo live trước lớp OK"]
+      }
+    ]
+  },
+  {
+    id:6, icon:"🎯", color:"#34d399", title:"TỔNG KẾT & BÁO CÁO",
+    desc:"Tổng kết lý thuyết SDN, thuyết trình đề tài và báo cáo cuối kỳ.",
+    theory:[
+      { title:"6.1 Tổng kết SDN", content:`SDN Summary & Future Directions
+
+So sánh Traditional vs SDN:
+┌────────────────┬───────────────┬──────────────────┐
+│ Tiêu chí       │ Traditional   │ SDN              │
+├────────────────┼───────────────┼──────────────────┤
+│ Configuration  │ Per-device    │ Centralized      │
+│ Programmability│ CLI/SNMP      │ REST API         │
+│ Visibility     │ Limited       │ Full topology    │
+│ Automation     │ Scripts       │ Intent-based     │
+│ Failover       │ STP/OSPF      │ Proactive        │
+│ Cost           │ High CapEx    │ Lower with OVS   │
+└────────────────┴───────────────┴──────────────────┘
+
+SDN Use Cases:
+• Data Center: VMware NSX, Cisco ACI
+• WAN: SD-WAN (Viptela, Meraki)  
+• Campus: Cisco DNA Center (DNAC)
+• Service Provider: Nokia SR Linux
+
+Xu hướng tương lai:
+• Intent-Based Networking (IBN)
+• AI/ML Network Automation
+• Cloud-Native Networking
+• eBPF in Linux networking` },
+      { title:"6.2 Hướng dẫn Báo Cáo", content:`Cấu trúc Báo Cáo Cuối Kỳ
+
+Báo cáo nhóm (15%) - Format:
+1. Trang bìa: Tên đề tài, nhóm, MSSV
+2. Mục lục
+3. Tổng quan đề tài (1 trang)
+4. Công nghệ sử dụng (2-3 trang)
+5. Thiết kế kiến trúc (topology, flowchart)
+6. Implementation (code + screenshots)
+7. Kết quả thực nghiệm (benchmark)
+8. Kết luận và hướng phát triển
+9. Tài liệu tham khảo
+
+Slide thuyết trình (10 slide):
+• Slide 1: Tên đề tài, nhóm
+• Slide 2-3: Giới thiệu vấn đề
+• Slide 4-5: Giải pháp đề xuất
+• Slide 6-7: Demo/Implementation
+• Slide 8: Kết quả đạt được
+• Slide 9: Khó khăn & bài học
+• Slide 10: Q&A
+
+Chấm điểm demo:
+• App chạy được: 40%
+• Code chất lượng: 30%  
+• Thuyết trình: 20%
+• Q&A: 10%` }
+    ],
+    labs:[
+      { num:"L6.1", name:"Báo Cáo & Demo Cuối Kỳ", dur:"120 phút", diff:2,
+        steps:["Hoàn thiện NetworkManager app","Viết báo cáo theo template","Tạo slide thuyết trình","Chuẩn bị demo script","Thuyết trình nhóm (10 phút)","Q&A với giảng viên (5 phút)"],
+        code:`# Demo Script Gợi Ý
+
+print("=" * 50)
+print("DEMO: Network Management Application")
+print("Nhóm: [Tên nhóm] - Chuyên Đề MMT 1")
+print("=" * 50)
+
+# 1. Khởi tạo
+print("\\n[1] Đăng nhập vào APIC-EM Controller...")
+mgr = NetworkManager()
+mgr.login("devnetuser", "Cisco123!")
+
+# 2. Discovery
+print("\\n[2] Network Discovery...")
+mgr.discover_devices()
+
+# 3. Inventory
+print("\\n[3] Inventory Report:")
+mgr.show_inventory()
+
+# 4. Topology
+print("\\n[4] Network Topology:")
+mgr.get_topology()
+
+# 5. Path Trace
+print("\\n[5] Kiểm tra kết nối...")
+mgr.check_path("10.10.22.98", "10.10.22.114")
+
+# 6. Export
+print("\\n[6] Export báo cáo...")
+mgr.export_report("network_report.json")
+print("✓ Demo hoàn tất!")`,
+        result:["App demo không lỗi","Inventory hiển thị","Topology vẽ được","Path trace trả kết quả","Báo cáo file xuất OK"]
+      }
+    ]
   }
-  return(
-    <div style={{background:"#020d18",minHeight:"100vh",fontFamily:"'Share Tech Mono','Courier New',monospace",color:"#c0d8f0",width:"100%",overflowX:"hidden"}}>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@600;700&display=swap');
-        *{box-sizing:border-box;margin:0;padding:0}
-        ::-webkit-scrollbar{width:4px;height:4px}
-        ::-webkit-scrollbar-track{background:#020d18}
-        ::-webkit-scrollbar-thumb{background:#00d4ff22;border-radius:2px}
-        @keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
-        .fade{animation:fadeIn 0.2s ease}
-        @keyframes pulse{0%,100%{opacity:.5}50%{opacity:1}}
-        .pulse{animation:pulse 2.5s infinite}
-        pre{white-space:pre-wrap;word-break:break-all;font-family:'Share Tech Mono',monospace}
-        a{color:#10b981;text-decoration:none}
-        button{cursor:pointer;font-family:inherit}
-        @media(max-width:600px){
-          .hdr-title{font-size:14px!important;letter-spacing:1px!important}
-          .hdr-sub{display:none!important}
-          .badges{display:none!important}
-          .mod-tags{display:none!important}
-          .inst-bar{font-size:10px!important;gap:5px!important;padding:6px 12px!important}
-          .nav-btn{padding:9px 10px!important;font-size:11px!important}
-          .section-title{font-size:10px!important}
-          .topo-btn{padding:5px 10px!important;font-size:10px!important}
-          .desk-only{display:none!important}
-        }
-        @media(min-width:601px){
-          .mob-only{display:none!important}
-        }
-      `}</style>
+];
 
-      {/* HEADER */}
-      <div style={{background:"linear-gradient(180deg,#091e30 0%,#020d18 100%)",borderBottom:"1px solid #00d4ff1a",padding:"10px 16px",display:"flex",alignItems:"center",gap:10}}>
-        <div style={{width:38,height:38,borderRadius:7,background:"#00d4ff12",border:"1.5px solid #00d4ff33",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,flexShrink:0}}>🌐</div>
-        <div style={{flex:1,minWidth:0}}>
-          <div className="hdr-title" style={{fontFamily:"Rajdhani,sans-serif",fontWeight:700,fontSize:16,color:"#00d4ff",letterSpacing:2}}>NGN / IPv6 LAB TOPOLOGY VIEWER</div>
-          <div className="hdr-sub" style={{fontSize:16,color:"#1a5a7a",marginTop:1}}>EVE-NG • OSPFv3 • BGP • Multicast • QoS • Cisco CME • FreePBX</div>
+const SDN_THESIS = [
+  { id:1, icon:"🤖", color:"#38bdf8", level:"easy", dur:"3-4 tuần", team:"2-3 SV",
+    title:"Network Inventory Tool với Python",
+    overview:"Xây dựng công cụ tự động thu thập và báo cáo inventory thiết bị mạng qua APIC-EM API.",
+    scope:["Kết nối APIC-EM API","Thu thập: hostname, IP, type, software version","Export CSV/JSON/HTML report","Filter và search devices","Auto-refresh định kỳ"],
+    code:`class InventoryTool:
+    def collect(self): ...
+    def export_csv(self, filename): ...
+    def export_html(self, filename): ...
+    def search(self, query): ...`,
+    deploy:["Tuần 1: Setup, API connection","Tuần 2: Collect + parse data","Tuần 3: Report generation","Tuần 4: Testing, docs"],
+    result:["Inventory đầy đủ","3 format export","Search hoạt động","Scheduled refresh"],
+    tech:["Python","requests","APIC-EM API","CSV","HTML","Pandas"]
+  },
+  { id:2, icon:"🗺️", color:"#4ade80", level:"easy", dur:"3-4 tuần", team:"2-3 SV",
+    title:"Topology Visualizer",
+    overview:"Ứng dụng hiển thị topology mạng dạng đồ thị từ dữ liệu APIC-EM, với highlight trạng thái link.",
+    scope:["Lấy topology data từ API","Parse nodes và links","Vẽ đồ thị với networkx/matplotlib","Color-code theo device type","Link status visualization"],
+    code:`import networkx as nx
+import matplotlib.pyplot as plt
+
+G = nx.Graph()
+for node in nodes: G.add_node(node["label"])
+for link in links: G.add_edge(...)
+nx.draw(G, with_labels=True)`,
+    deploy:["Tuần 1: Data collection","Tuần 2: Graph building","Tuần 3: Visualization","Tuần 4: Polish & demo"],
+    result:["Topology graph đúng","Color coding theo type","Link status hiện thị","Export PNG/SVG"],
+    tech:["Python","networkx","matplotlib","APIC-EM API","Graphviz"]
+  },
+  { id:3, icon:"🔍", color:"#fb923c", level:"medium", dur:"4-6 tuần", team:"2-4 SV",
+    title:"Path Trace & Connectivity Checker",
+    overview:"Tool kiểm tra kết nối end-to-end giữa các cặp thiết bị, phân tích ACL, hiển thị đường đi chi tiết.",
+    scope:["Nhập source/dest IP","Gọi flow-analysis API","Hiển thị từng hop trên đường đi","Detect ACL blocks","Đo latency ước tính","Batch test nhiều cặp"],
+    code:`def trace_all_pairs(pairs):
+    results = []
+    for src, dst in pairs:
+        result = mgr.check_path(src, dst)
+        results.append(analyze_path(result))
+    return generate_report(results)`,
+    deploy:["Tuần 1-2: Path trace implementation","Tuần 3-4: ACL analysis","Tuần 5: Batch testing","Tuần 6: Report + demo"],
+    result:["Path trace đúng","ACL blocks detected","Batch test 10+ pairs","Report với hop details"],
+    tech:["Python","APIC-EM API","JSON","Tabulate","HTML Report"]
+  },
+  { id:4, icon:"🧩", color:"#c084fc", level:"medium", dur:"5-7 tuần", team:"3-5 SV",
+    title:"SDN Network Monitor Dashboard",
+    overview:"Dashboard giám sát mạng SDN real-time: device status, topology, alerts, auto-refresh.",
+    scope:["Web app Flask/FastAPI","Real-time device status","Topology visualization (D3.js/Cytoscape)","Alert khi device down","Historical data logging","REST API endpoint"],
+    code:`from flask import Flask, jsonify
+app = Flask(__name__)
+
+@app.route('/api/devices')
+def get_devices():
+    return jsonify(mgr.get_devices())
+
+@app.route('/api/topology')
+def get_topology():
+    return jsonify(mgr.get_topology())
+
+if __name__ == '__main__':
+    app.run(debug=True)`,
+    deploy:["Tuần 1-2: Backend API","Tuần 3-4: Frontend Dashboard","Tuần 5: Alerts & Logging","Tuần 6-7: Integration, demo"],
+    result:["Dashboard web accessible","Real-time refresh 30s","Alert email/Telegram","REST API documented"],
+    tech:["Python","Flask","JavaScript","D3.js","APIC-EM API","SQLite"]
+  },
+  { id:5, icon:"🚀", color:"#f472b6", level:"hard", dur:"7-9 tuần", team:"3-5 SV",
+    title:"SDN Intent-Based Configuration Tool",
+    overview:"Ứng dụng cho phép admin định nghĩa policy bằng ngôn ngữ tự nhiên, tự động dịch sang cấu hình mạng.",
+    scope:["YAML intent definition","Map intent → Cisco IOS commands","Push config qua NETCONF/Paramiko","Verify sau khi apply","Rollback mechanism","Audit log"],
+    code:`# intent.yaml
+policies:
+  - name: "QoS for VoIP"
+    match: "dscp ef"
+    action: "priority 20%"
+  
+# Auto-generate:
+# class-map VOIP
+#   match dscp ef
+# policy-map QOS
+#   class VOIP
+#     priority percent 20`,
+    deploy:["Tuần 1-2: Intent language design","Tuần 3-4: Translator engine","Tuần 5-6: NETCONF push","Tuần 7: Verify+rollback","Tuần 8-9: Testing, docs"],
+    result:["YAML intent parsed","Commands generated đúng","Push via NETCONF OK","Rollback hoạt động"],
+    tech:["Python","NETCONF","ncclient","Paramiko","YAML","Jinja2"]
+  }
+];
+
+// ============================================================
+// SHARED COMPONENTS
+// ============================================================
+function LabCard({ lab, color, isOpen, onToggle }) {
+  const [tab, setTab] = useState("steps");
+  const tabs = [["steps","🔧 Bước"], ["code","💻 Code"], ["result","✅ Kết quả"]];
+
+  return (
+    <div>
+      <div onClick={onToggle} style={{
+        padding:"10px 14px", borderBottom:"1px solid #0a1828",
+        display:"flex", alignItems:"center", gap:8, cursor:"pointer",
+        background: isOpen ? `${color}08` : "transparent"
+      }}>
+        <div style={{
+          width:32, height:32, borderRadius:5, background:`${color}15`,
+          border:`1px solid ${color}40`, display:"flex", alignItems:"center",
+          justifyContent:"center", fontSize:11, color, flexShrink:0, fontWeight:700
+        }}>{lab.num}</div>
+        <div style={{flex:1}}>
+          <div style={{fontSize:13, color:"#b0cce0", fontFamily:"Rajdhani,sans-serif", fontWeight:600}}>{lab.name}</div>
+          <div style={{display:"flex", gap:8, marginTop:2}}>
+            <span style={{fontSize:11, color:"#3a5a7a"}}>⏱ {lab.dur}</span>
+            <span style={{fontSize:11, color:"#3a5a7a"}}>{"★".repeat(lab.diff)}{"☆".repeat(4-lab.diff)}</span>
+          </div>
         </div>
-        <div className="badges" style={{display:"flex",gap:4,flexWrap:"wrap",justifyContent:"flex-end"}}>
-          {[["🟢","IPv6","#10b981"],["🔵","OSPFv3","#00d4ff"],["🟠","BGP","#ff6b35"],["🟣","VoIP","#a855f7"]].map(([e,l,c])=>(
-            <div key={l} style={{background:"#0a1e2a",border:`1px solid ${c}33`,borderRadius:10,padding:"2px 8px",fontSize:16,color:c,display:"flex",gap:3,alignItems:"center"}}>
-              <span className="pulse">{e}</span><span>{l}</span>
+        <span style={{color:"#1a3a5a", fontSize:14, flexShrink:0}}>{isOpen?"▲":"▼"}</span>
+      </div>
+      {isOpen && (
+        <div style={{padding:"12px 14px", background:"#020910", borderBottom:"1px solid #0a1828"}}>
+          <div style={{display:"flex", gap:4, marginBottom:10, flexWrap:"wrap"}}>
+            {tabs.map(([k,l]) => (
+              <button key={k} onClick={e=>{e.stopPropagation();setTab(k);}} style={{
+                background: tab===k ? `${color}1a` : "#030c18",
+                border:`1px solid ${tab===k ? color : "#0a1828"}`,
+                color: tab===k ? color : "#3a6a8a",
+                padding:"5px 10px", borderRadius:4, fontSize:11, whiteSpace:"nowrap", cursor:"pointer"
+              }}>{l}</button>
+            ))}
+          </div>
+          {tab==="steps" && (
+            <div>
+              {(lab.steps || lab.deploy || []).map((st,i) => (
+                <div key={i} style={{display:"flex", gap:8, marginBottom:6, alignItems:"flex-start"}}>
+                  <div style={{
+                    width:18, height:18, borderRadius:"50%", background:`${color}15`,
+                    border:`1px solid ${color}50`, display:"flex", alignItems:"center",
+                    justifyContent:"center", fontSize:10, color, flexShrink:0, fontWeight:700
+                  }}>{i+1}</div>
+                  <span style={{fontSize:12, color:"#7a9aba", lineHeight:1.6}}>{st}</span>
+                </div>
+              ))}
             </div>
-          ))}
+          )}
+          {tab==="code" && (
+            <pre style={{
+              background:"#010810", borderRadius:7, padding:"12px", fontSize:11,
+              color:"#00e5aa", lineHeight:1.8, overflowX:"auto",
+              borderLeft:`3px solid ${color}`, margin:0
+            }}>{lab.code || lab.cmds || ""}</pre>
+          )}
+          {tab==="result" && (
+            <div>
+              {(lab.result || []).map((r,i) => (
+                <div key={i} style={{
+                  display:"flex", gap:8, marginBottom:6, background:"#031208",
+                  border:"1px solid #0a2018", borderRadius:4, padding:"6px 10px"
+                }}>
+                  <span style={{color:"#10b981", fontSize:11, flexShrink:0}}>✓</span>
+                  <span style={{fontSize:12, color:"#6ab09a"}}>{r}</span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
-      </div>
+      )}
+    </div>
+  );
+}
 
-      {/* INSTRUCTOR BAR */}
-      <div className="inst-bar" style={{background:"#040f1c",borderBottom:"1px solid #0a2a40",padding:"7px 16px",display:"flex",gap:8,alignItems:"center",fontSize:16,flexWrap:"wrap"}}>
-        <span>👨‍🏫</span>
-        <span style={{color:"#00d4ff",fontWeight:"bold"}}>Trần Vĩnh Phúc</span>
-        <span style={{color:"#1a3a5a"}}>|</span>
-        <a href="mailto:phuctv@dlu.edu.vn">phuctv@dlu.edu.vn</a>
-        <span className="desk-only" style={{color:"#1a3a5a"}}>|</span>
-        <span className="desk-only" style={{color:"#3a6a8a"}}>Đại học Đà Lạt</span>
-        <div style={{marginLeft:"auto",background:"#0a1e2a",border:"1px solid #00d4ff1a",borderRadius:10,padding:"2px 10px",fontSize:16,color:"#4a8a9a",whiteSpace:"nowrap"}}>6 Modules · 25 Labs · 10 Đề Tài</div>
-      </div>
+// ============================================================
+// NGN COURSE VIEW
+// ============================================================
+function NGNCourse() {
+  const [view, setView] = useState("modules");
+  const [expMod, setExpMod] = useState(null);
+  const [expLab, setExpLab] = useState(null);
+  const [labTab, setLabTab] = useState("deploy");
+  const [expThesis, setExpThesis] = useState(null);
+  const [thesisTab, setThesisTab] = useState("overview");
+  const [filter, setFilter] = useState("all");
+  const filtered = filter==="all" ? NGN_THESIS : NGN_THESIS.filter(t=>t.level===filter);
 
-      {/* NAV */}
-      <div style={{display:"flex",borderBottom:"1px solid #0a2a40",background:"#030e1a",overflowX:"auto"}}>
-        {[["topology","🗺","Topology"],["modules","📚","Modules & Labs"],["thesis","🎓","Đề Tài"],["guide","📖","Hướng Dẫn"]].map(([k,ic,l])=>(
-          <button key={k} onClick={()=>setView(k)} className="nav-btn" style={{background:view===k?"#041a2a":"transparent",border:"none",borderBottom:view===k?"2px solid #00d4ff":"2px solid transparent",color:view===k?"#00d4ff":"#3a6a8a",padding:"10px 14px",fontSize:16,transition:"all 0.2s",flexShrink:0,whiteSpace:"nowrap"}}>
-            <span className="mob-only">{ic}</span>
-            <span className="desk-only">{ic} {l}</span>
-            <span className="mob-only"> {l}</span>
-          </button>
+  return (
+    <div>
+      {/* Sub Nav */}
+      <div style={{display:"flex", borderBottom:"1px solid #0a2a40", background:"#030e1a", overflowX:"auto"}}>
+        {[["modules","📚","Modules & Labs"],["thesis","🎓","Đề Tài NGN"],["guide","📖","Hướng Dẫn"]].map(([k,ic,l])=>(
+          <button key={k} onClick={()=>setView(k)} style={{
+            background:view===k?"#041a2a":"transparent",
+            border:"none", borderBottom:view===k?"2px solid #00d4ff":"2px solid transparent",
+            color:view===k?"#00d4ff":"#3a6a8a",
+            padding:"9px 14px", fontSize:12, cursor:"pointer", transition:"all 0.2s", flexShrink:0, whiteSpace:"nowrap"
+          }}>{ic} {l}</button>
         ))}
       </div>
 
-      {/* CONTENT */}
-      <div style={{padding:"14px 14px",width:"100%"}}>
-
-        {/* TOPOLOGY */}
-        {view==="topology"&&(
-          <div className="fade">
-            <div className="section-title" style={{fontFamily:"Rajdhani,sans-serif",fontWeight:700,fontSize:16,color:"#3a6a8a",letterSpacing:3,marginBottom:10}}>▸ SƠ ĐỒ TOPOLOGY MẠNG</div>
-            <div style={{display:"flex",gap:5,marginBottom:10,flexWrap:"wrap"}}>
-              {TOPOS.map(t=>(
-                <button key={t.id} onClick={()=>setTopo(t.id)} className="topo-btn" style={{background:topo===t.id?"#0a2a3a":"#050f18",border:`1px solid ${topo===t.id?"#00d4ff":"#1a3a5a"}`,color:topo===t.id?"#00d4ff":"#3a6a8a",padding:"6px 12px",borderRadius:5,fontSize:16,transition:"all 0.2s",whiteSpace:"nowrap"}}>{t.label}</button>
-              ))}
-            </div>
-            <div style={{background:"#020d18",border:"1px solid #0a2a40",borderRadius:9,overflow:"hidden"}}>
-              <div style={{background:"#030f1a",borderBottom:"1px solid #0a2a40",padding:"7px 14px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                <span style={{color:"#00d4ff",fontSize:16,fontFamily:"Rajdhani,sans-serif",fontWeight:700}}>{TOPOS.find(t=>t.id===topo)?.label}</span>
-                <span style={{color:"#1a4a6a",fontSize:16}}>EVE-NG Lab</span>
-              </div>
-              <div style={{width:"100%",aspectRatio:"16/9",minHeight:240}}><TopoComp/></div>
-            </div>
-          </div>
-        )}
-
+      <div style={{padding:"14px"}}>
         {/* MODULES */}
-        {view==="modules"&&(
-          <div className="fade">
-            <div className="section-title" style={{fontFamily:"Rajdhani,sans-serif",fontWeight:700,fontSize:16,color:"#3a6a8a",letterSpacing:3,marginBottom:12}}>▸ 6 MODULES · 25 LABS CHI TIẾT</div>
-            {MODULES.map(mod=>(
+        {view==="modules" && (
+          <div>
+            <div style={{fontFamily:"Rajdhani,sans-serif",fontWeight:700,fontSize:13,color:"#3a6a8a",letterSpacing:3,marginBottom:12}}>▸ 6 MODULES · 25 LABS CHI TIẾT</div>
+            {NGN_MODULES.map(mod => (
               <div key={mod.id} style={{marginBottom:8}}>
-                <div onClick={()=>{setExpMod(expMod===mod.id?null:mod.id);setExpLab(null);}}
-                  style={{background:"#040f18",borderRadius:expMod===mod.id?"8px 8px 0 0":8,padding:"12px 14px",cursor:"pointer",border:`1px solid ${expMod===mod.id?mod.color:"#0a2030"}`,borderLeft:`4px solid ${mod.color}`,transition:"all 0.18s"}}>
-                  <div style={{display:"flex",alignItems:"center",gap:10}}>
-                    <div style={{fontSize:20,width:36,height:36,display:"flex",alignItems:"center",justifyContent:"center",background:`${mod.color}12`,border:`1px solid ${mod.color}30`,borderRadius:6,flexShrink:0}}>{mod.icon}</div>
-                    <div style={{flex:1,minWidth:0}}>
-                      <div style={{display:"flex",gap:6,alignItems:"center",marginBottom:2,flexWrap:"wrap"}}>
-                        <span style={{color:mod.color,fontWeight:700,fontSize:15,letterSpacing:2}}>MODULE {mod.id}</span>
-                        <span style={{color:"#1a4a6a",fontSize:16}}>|</span>
-                        <span style={{color:"#3a6a8a",fontSize:15}}>{mod.labs}</span>
+                <div onClick={()=>{setExpMod(expMod===mod.id?null:mod.id);setExpLab(null);}} style={{
+                  background:"#040f18", borderRadius:expMod===mod.id?"8px 8px 0 0":8,
+                  padding:"12px 14px", cursor:"pointer",
+                  border:`1px solid ${expMod===mod.id?mod.color:"#0a2030"}`,
+                  borderLeft:`4px solid ${mod.color}`, transition:"all 0.18s"
+                }}>
+                  <div style={{display:"flex", alignItems:"center", gap:10}}>
+                    <div style={{fontSize:18, width:34, height:34, display:"flex", alignItems:"center", justifyContent:"center", background:`${mod.color}12`, border:`1px solid ${mod.color}30`, borderRadius:6, flexShrink:0}}>{mod.icon}</div>
+                    <div style={{flex:1}}>
+                      <div style={{display:"flex", gap:6, alignItems:"center", marginBottom:2, flexWrap:"wrap"}}>
+                        <span style={{color:mod.color, fontWeight:700, fontSize:13}}>MODULE {mod.id}</span>
+                        <span style={{color:"#1a4a6a", fontSize:12}}>|</span>
+                        <span style={{color:"#3a6a8a", fontSize:12}}>{mod.labs}</span>
                       </div>
-                      <div style={{fontFamily:"Rajdhani,sans-serif",fontWeight:700,fontSize:16,color:"#d0e8ff"}}>{mod.title}</div>
-                      <div style={{fontSize:15,color:"#3a6a8a",marginTop:2}}>{mod.desc}</div>
+                      <div style={{fontFamily:"Rajdhani,sans-serif", fontWeight:700, fontSize:14, color:"#d0e8ff"}}>{mod.title}</div>
+                      <div style={{fontSize:11, color:"#3a6a8a", marginTop:2}}>{mod.desc}</div>
                     </div>
-                    <div className="mod-tags" style={{display:"flex",gap:4,flexWrap:"wrap",maxWidth:200,justifyContent:"flex-end",flexShrink:0}}>
-                      {mod.tags.map(t=><span key={t} style={{background:"#020d18",border:`1px solid ${mod.color}40`,borderRadius:3,padding:"1px 6px",fontSize:16,color:mod.color}}>{t}</span>)}
+                    <div style={{display:"flex", gap:3, flexWrap:"wrap", maxWidth:160, justifyContent:"flex-end", flexShrink:0}}>
+                      {mod.tags.map(t=><span key={t} style={{background:"#020d18",border:`1px solid ${mod.color}40`,borderRadius:3,padding:"1px 5px",fontSize:10,color:mod.color}}>{t}</span>)}
                     </div>
-                    <span style={{color:mod.color,fontSize:14,marginLeft:4,flexShrink:0}}>{expMod===mod.id?"▲":"▼"}</span>
+                    <span style={{color:mod.color, fontSize:12, marginLeft:4, flexShrink:0}}>{expMod===mod.id?"▲":"▼"}</span>
                   </div>
                 </div>
-
-                {expMod===mod.id&&(
-                  <div className="fade" style={{background:"#030b16",border:`1px solid ${mod.color}1a`,borderTop:"none",borderRadius:"0 0 8px 8px"}}>
-                    {mod.labList.map(lab=>{
-                      const k=`${mod.id}-${lab.num}`;
-                      const open=expLab===k;
-                      return(
+                {expMod===mod.id && (
+                  <div style={{background:"#030b16", border:`1px solid ${mod.color}1a`, borderTop:"none", borderRadius:"0 0 8px 8px"}}>
+                    {mod.labList.map(lab => {
+                      const k = `${mod.id}-${lab.num}`;
+                      const open = expLab===k;
+                      return (
                         <div key={lab.num}>
-                          <div onClick={()=>{setExpLab(open?null:k);setLabTab("deploy");}}
-                            style={{padding:"10px 14px",borderBottom:"1px solid #0a1828",display:"flex",alignItems:"center",gap:8,cursor:"pointer",transition:"background 0.15s"}}>
-                            <div style={{width:32,height:32,borderRadius:5,background:`${mod.color}15`,border:`1px solid ${mod.color}40`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,color:mod.color,flexShrink:0,fontWeight:700}}>{lab.num}</div>
-                            <div style={{flex:1,minWidth:0}}>
-                              <div style={{fontSize:13,color:"#b0cce0",fontFamily:"Rajdhani,sans-serif",fontWeight:600}}>{lab.name}</div>
-                              <div style={{display:"flex",gap:8,marginTop:2}}>
-                                <span style={{fontSize:15,color:"#3a5a7a"}}>⏱ {lab.dur}</span>
-                                <span style={{fontSize:15,color:"#3a5a7a"}}>{"★".repeat(lab.diff)}{"☆".repeat(4-lab.diff)}</span>
+                          <div onClick={()=>{setExpLab(open?null:k);setLabTab("deploy");}} style={{
+                            padding:"10px 14px", borderBottom:"1px solid #0a1828",
+                            display:"flex", alignItems:"center", gap:8, cursor:"pointer"
+                          }}>
+                            <div style={{width:32, height:32, borderRadius:5, background:`${mod.color}15`, border:`1px solid ${mod.color}40`, display:"flex", alignItems:"center", justifyContent:"center", fontSize:11, color:mod.color, flexShrink:0, fontWeight:700}}>{lab.num}</div>
+                            <div style={{flex:1}}>
+                              <div style={{fontSize:13, color:"#b0cce0", fontFamily:"Rajdhani,sans-serif", fontWeight:600}}>{lab.name}</div>
+                              <div style={{display:"flex", gap:8, marginTop:2}}>
+                                <span style={{fontSize:11, color:"#3a5a7a"}}>⏱ {lab.dur}</span>
+                                <span style={{fontSize:11, color:"#3a5a7a"}}>{"★".repeat(lab.diff)}{"☆".repeat(4-lab.diff)}</span>
                               </div>
                             </div>
-                            <span style={{color:"#1a3a5a",fontSize:16,flexShrink:0}}>{open?"▲":"▼"}</span>
+                            <span style={{color:"#1a3a5a", fontSize:12, flexShrink:0}}>{open?"▲":"▼"}</span>
                           </div>
-
-                          {open&&(
-                            <div className="fade" style={{padding:"12px 14px",background:"#020910",borderBottom:"1px solid #0a1828"}}>
-                              <div style={{display:"flex",gap:4,marginBottom:10,flexWrap:"wrap"}}>
+                          {open && (
+                            <div style={{padding:"12px 14px", background:"#020910", borderBottom:"1px solid #0a1828"}}>
+                              <div style={{display:"flex", gap:4, marginBottom:10, flexWrap:"wrap"}}>
                                 {[["deploy","🔧 Deploy"],["cmds","💻 Lệnh"],["topo","📐 Topo"],["result","✅ Kết Quả"],["hints","💡 Gợi Ý"]].map(([k2,l])=>(
-                                  <button key={k2} onClick={e=>{e.stopPropagation();setLabTab(k2);}} style={{background:labTab===k2?`${mod.color}1a`:"#030c18",border:`1px solid ${labTab===k2?mod.color:"#0a1828"}`,color:labTab===k2?mod.color:"#3a6a8a",padding:"5px 10px",borderRadius:4,fontSize:15,whiteSpace:"nowrap"}}>{l}</button>
+                                  <button key={k2} onClick={e=>{e.stopPropagation();setLabTab(k2);}} style={{background:labTab===k2?`${mod.color}1a`:"#030c18",border:`1px solid ${labTab===k2?mod.color:"#0a1828"}`,color:labTab===k2?mod.color:"#3a6a8a",padding:"4px 9px",borderRadius:4,fontSize:11,whiteSpace:"nowrap",cursor:"pointer"}}>{l}</button>
                                 ))}
                               </div>
-
-                              {labTab==="deploy"&&(
-                                <div>
-                                  <div style={{fontSize:15,color:mod.color,fontWeight:700,letterSpacing:1,marginBottom:8}}>HƯỚNG DẪN TRIỂN KHAI</div>
-                                  {lab.deploy.map((st,i)=>(
-                                    <div key={i} style={{display:"flex",gap:8,marginBottom:7,alignItems:"flex-start"}}>
-                                      <div style={{width:20,height:20,borderRadius:"50%",background:`${mod.color}15`,border:`1px solid ${mod.color}50`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,color:mod.color,flexShrink:0,fontWeight:700}}>{i+1}</div>
-                                      <span style={{fontSize:16,color:"#7a9aba",lineHeight:1.7}}>{st}</span>
-                                    </div>
-                                  ))}
-                                </div>
-                              )}
-                              {labTab==="cmds"&&(
-                                <div>
-                                  <div style={{fontSize:15,color:mod.color,fontWeight:700,letterSpacing:1,marginBottom:8}}>LỆNH CẤU HÌNH & VERIFY</div>
-                                  <pre style={{background:"#010810",borderRadius:7,padding:"12px",fontSize:16,color:"#00e5aa",lineHeight:1.9,overflowX:"auto",borderLeft:`3px solid ${mod.color}`}}>{lab.cmds}</pre>
-                                </div>
-                              )}
-                              {labTab==="topo"&&(
-                                <div>
-                                  <div style={{fontSize:15,color:mod.color,fontWeight:700,letterSpacing:1,marginBottom:8}}>TOPOLOGY LAB</div>
-                                  <pre style={{background:"#010810",borderRadius:7,padding:"12px",fontSize:16,color:"#00d4ff",lineHeight:1.9,overflowX:"auto",borderLeft:`3px solid ${mod.color}`}}>{lab.topo}</pre>
-                                </div>
-                              )}
-                              {labTab==="result"&&(
-                                <div>
-                                  <div style={{fontSize:15,color:mod.color,fontWeight:700,letterSpacing:1,marginBottom:8}}>KẾT QUẢ DỰ KIẾN</div>
-                                  {lab.result.map((r,i)=>(
-                                    <div key={i} style={{display:"flex",gap:8,marginBottom:6,background:"#031208",border:"1px solid #0a2018",borderRadius:4,padding:"7px 10px"}}>
-                                      <span style={{color:"#10b981",fontSize:13,flexShrink:0}}>✓</span>
-                                      <span style={{fontSize:16,color:"#6ab09a"}}>{r}</span>
-                                    </div>
-                                  ))}
-                                </div>
-                              )}
-                              {labTab==="hints"&&(
-                                <div>
-                                  <div style={{fontSize:15,color:"#f59e0b",fontWeight:700,letterSpacing:1,marginBottom:8}}>💡 GỢI Ý & TROUBLESHOOTING</div>
-                                  {lab.hints.map((h,i)=>(
-                                    <div key={i} style={{display:"flex",gap:8,marginBottom:6,background:"#0f0d02",border:"1px solid #2a1a00",borderRadius:4,padding:"7px 10px"}}>
-                                      <span style={{color:"#f59e0b",fontSize:15,flexShrink:0}}>→</span>
-                                      <span style={{fontSize:16,color:"#b09a4a"}}>{h}</span>
-                                    </div>
-                                  ))}
-                                </div>
-                              )}
+                              {labTab==="deploy" && <div>{lab.deploy.map((st,i)=><div key={i} style={{display:"flex",gap:8,marginBottom:6,alignItems:"flex-start"}}><div style={{width:18,height:18,borderRadius:"50%",background:`${mod.color}15`,border:`1px solid ${mod.color}50`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,color:mod.color,flexShrink:0,fontWeight:700}}>{i+1}</div><span style={{fontSize:12,color:"#7a9aba",lineHeight:1.6}}>{st}</span></div>)}</div>}
+                              {labTab==="cmds" && <pre style={{background:"#010810",borderRadius:7,padding:"12px",fontSize:11,color:"#00e5aa",lineHeight:1.8,overflowX:"auto",borderLeft:`3px solid ${mod.color}`,margin:0}}>{lab.cmds}</pre>}
+                              {labTab==="topo" && <pre style={{background:"#010810",borderRadius:7,padding:"12px",fontSize:11,color:"#00d4ff",lineHeight:1.8,overflowX:"auto",borderLeft:`3px solid ${mod.color}`,margin:0}}>{lab.topo}</pre>}
+                              {labTab==="result" && <div>{lab.result.map((r,i)=><div key={i} style={{display:"flex",gap:8,marginBottom:6,background:"#031208",border:"1px solid #0a2018",borderRadius:4,padding:"6px 10px"}}><span style={{color:"#10b981",fontSize:11,flexShrink:0}}>✓</span><span style={{fontSize:12,color:"#6ab09a"}}>{r}</span></div>)}</div>}
+                              {labTab==="hints" && <div>{lab.hints.map((h,i)=><div key={i} style={{display:"flex",gap:8,marginBottom:6,background:"#0f0d02",border:"1px solid #2a1a00",borderRadius:4,padding:"6px 10px"}}><span style={{color:"#f59e0b",fontSize:11,flexShrink:0}}>→</span><span style={{fontSize:12,color:"#b09a4a"}}>{h}</span></div>)}</div>}
                             </div>
                           )}
                         </div>
@@ -763,83 +1423,62 @@ export default function App(){
         )}
 
         {/* THESIS */}
-        {view==="thesis"&&(
-          <div className="fade">
-            <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:12,flexWrap:"wrap"}}>
-              <div className="section-title" style={{fontFamily:"Rajdhani,sans-serif",fontWeight:700,fontSize:16,color:"#3a6a8a",letterSpacing:3}}>{filtered.length} ĐỀ TÀI ĐỒ ÁN</div>
-              <div style={{display:"flex",gap:5,marginLeft:"auto",flexWrap:"wrap"}}>
-                {[["all","Tất Cả","#00d4ff"],["medium","Đồ Án Môn Học","#f59e0b"],["hard","NCKH/Luận Văn Tốt Nghiệp","#ff6b35"]].map(([k,l,c])=>(
-                  <button key={k} onClick={()=>setFilter(k)} style={{background:filter===k?`${c}18`:"#050f18",border:`1px solid ${filter===k?c:"#1a3050"}`,color:filter===k?c:"#3a6a8a",padding:"5px 12px",borderRadius:4,fontSize:16,whiteSpace:"nowrap"}}>{l}</button>
+        {view==="thesis" && (
+          <div>
+            <div style={{display:"flex", alignItems:"center", gap:8, marginBottom:12, flexWrap:"wrap"}}>
+              <div style={{fontFamily:"Rajdhani,sans-serif",fontWeight:700,fontSize:13,color:"#3a6a8a",letterSpacing:3}}>{filtered.length} ĐỀ TÀI NGN</div>
+              <div style={{display:"flex", gap:5, marginLeft:"auto", flexWrap:"wrap"}}>
+                {[["all","Tất Cả","#00d4ff"],["medium","Đồ Án","#f59e0b"],["hard","NCKH/LV","#ff6b35"]].map(([k,l,c])=>(
+                  <button key={k} onClick={()=>setFilter(k)} style={{background:filter===k?`${c}18`:"#050f18",border:`1px solid ${filter===k?c:"#1a3050"}`,color:filter===k?c:"#3a6a8a",padding:"4px 10px",borderRadius:4,fontSize:11,cursor:"pointer",whiteSpace:"nowrap"}}>{l}</button>
                 ))}
               </div>
             </div>
-
-            {filtered.map(t=>(
+            {filtered.map(t => (
               <div key={t.id} style={{marginBottom:8}}>
-                <div onClick={()=>{setExpThesis(expThesis===t.id?null:t.id);setThesisTab("overview");}}
-                  style={{background:"#040f18",borderRadius:expThesis===t.id?"8px 8px 0 0":8,padding:"12px 14px",cursor:"pointer",border:`1px solid ${expThesis===t.id?t.color:"#0a2030"}`,borderLeft:`4px solid ${t.color}`,transition:"all 0.18s"}}>
+                <div onClick={()=>setExpThesis(expThesis===t.id?null:t.id)} style={{background:"#040f18",borderRadius:expThesis===t.id?"8px 8px 0 0":8,padding:"12px 14px",cursor:"pointer",border:`1px solid ${expThesis===t.id?t.color:"#0a2030"}`,borderLeft:`4px solid ${t.color}`,transition:"all 0.18s"}}>
                   <div style={{display:"flex",alignItems:"center",gap:10}}>
-                    <div style={{fontSize:22,width:38,height:38,display:"flex",alignItems:"center",justifyContent:"center",background:`${t.color}12`,border:`1px solid ${t.color}30`,borderRadius:7,flexShrink:0}}>{t.icon}</div>
-                    <div style={{flex:1,minWidth:0}}>
+                    <div style={{fontSize:20,width:36,height:36,display:"flex",alignItems:"center",justifyContent:"center",background:`${t.color}12`,border:`1px solid ${t.color}30`,borderRadius:7,flexShrink:0}}>{t.icon}</div>
+                    <div style={{flex:1}}>
                       <div style={{display:"flex",gap:6,alignItems:"center",marginBottom:2,flexWrap:"wrap"}}>
-                        <span style={{color:t.color,fontWeight:700,fontSize:15}}>ĐỀ TÀI {t.id}</span>
-                        <span style={{background:`${t.color}15`,border:`1px solid ${t.color}40`,borderRadius:3,padding:"1px 7px",fontSize:16,color:t.color}}>{t.level==="medium"?"⭐⭐⭐ Đồ Án Môn Học":"⭐⭐⭐⭐⭐ NCKH/Luận Văn Tốt Nghiệp"}</span>
+                        <span style={{color:t.color,fontWeight:700,fontSize:13}}>ĐỀ TÀI {t.id}</span>
+                        <span style={{background:`${t.color}15`,border:`1px solid ${t.color}40`,borderRadius:3,padding:"1px 6px",fontSize:10,color:t.color}}>{t.level==="medium"?"⭐⭐⭐ Đồ Án Môn Học":t.level==="easy"?"⭐⭐ Cơ Bản":"⭐⭐⭐⭐⭐ NCKH/LV"}</span>
                       </div>
-                      <div style={{fontFamily:"Rajdhani,sans-serif",fontWeight:700,fontSize:14,color:"#d0e8ff"}}>{t.title}</div>
+                      <div style={{fontFamily:"Rajdhani,sans-serif",fontWeight:700,fontSize:13,color:"#d0e8ff"}}>{t.title}</div>
                       <div style={{display:"flex",gap:10,marginTop:2,flexWrap:"wrap"}}>
-                        <span style={{fontSize:15,color:"#3a6a8a"}}>⏱ {t.dur}</span>
-                        <span style={{fontSize:15,color:"#3a6a8a"}}>👥 {t.team}</span>
+                        <span style={{fontSize:11,color:"#3a6a8a"}}>⏱ {t.dur}</span>
+                        <span style={{fontSize:11,color:"#3a6a8a"}}>👥 {t.team}</span>
                       </div>
                     </div>
-                    <span style={{color:t.color,fontSize:14,flexShrink:0}}>{expThesis===t.id?"▲":"▼"}</span>
+                    <span style={{color:t.color,fontSize:12,flexShrink:0}}>{expThesis===t.id?"▲":"▼"}</span>
                   </div>
                 </div>
-
-                {expThesis===t.id&&(
-                  <div className="fade" style={{background:"#030b16",border:`1px solid ${t.color}1a`,borderTop:"none",borderRadius:"0 0 8px 8px",padding:"14px"}}>
+                {expThesis===t.id && (
+                  <div style={{background:"#030b16",border:`1px solid ${t.color}1a`,borderTop:"none",borderRadius:"0 0 8px 8px",padding:"14px"}}>
                     <div style={{display:"flex",gap:4,marginBottom:12,flexWrap:"wrap"}}>
-                      {[["overview","📋 Tổng Quan"],["topo","📐 Topology"],["deploy","🔧 Kế Hoạch"],["result","✅ Kết Quả"]].map(([k,l])=>(
-                        <button key={k} onClick={e=>{e.stopPropagation();setThesisTab(k);}} style={{background:thesisTab===k?`${t.color}1a`:"#030c18",border:`1px solid ${thesisTab===k?t.color:"#0a1828"}`,color:thesisTab===k?t.color:"#3a6a8a",padding:"5px 10px",borderRadius:4,fontSize:15,whiteSpace:"nowrap"}}>{l}</button>
+                      {[["overview","📋 Tổng Quan"],["topo","📐 Deploy"],["result","✅ Kết Quả"]].map(([k,l])=>(
+                        <button key={k} onClick={e=>{e.stopPropagation();setThesisTab(k);}} style={{background:thesisTab===k?`${t.color}1a`:"#030c18",border:`1px solid ${thesisTab===k?t.color:"#0a1828"}`,color:thesisTab===k?t.color:"#3a6a8a",padding:"4px 9px",borderRadius:4,fontSize:11,whiteSpace:"nowrap",cursor:"pointer"}}>{l}</button>
                       ))}
                     </div>
-
-                    {thesisTab==="overview"&&(
+                    {thesisTab==="overview" && (
                       <div>
                         <div style={{background:`${t.color}08`,border:`1px solid ${t.color}1a`,borderRadius:6,padding:"10px 12px",marginBottom:10}}>
-                          <div style={{fontSize:15,color:t.color,fontWeight:700,marginBottom:4}}>TỔNG QUAN</div>
-                          <div style={{fontSize:16,color:"#7a9aba",lineHeight:1.7}}>{t.overview}</div>
+                          <div style={{fontSize:11,color:t.color,fontWeight:700,marginBottom:4}}>TỔNG QUAN</div>
+                          <div style={{fontSize:12,color:"#7a9aba",lineHeight:1.7}}>{t.overview}</div>
                         </div>
-                        <div style={{fontSize:15,color:t.color,fontWeight:700,marginBottom:8}}>PHẠM VI</div>
-                        {t.scope.map((sc,i)=>(
-                          <div key={i} style={{display:"flex",gap:6,background:"#030c18",border:`1px solid ${t.color}1a`,borderRadius:4,padding:"7px 10px",marginBottom:5}}>
-                            <span style={{color:t.color,fontSize:15,flexShrink:0}}>▸</span>
-                            <span style={{fontSize:16,color:"#7a9aba",lineHeight:1.5}}>{sc}</span>
-                          </div>
-                        ))}
-                        <div style={{marginTop:10,display:"flex",gap:5,flexWrap:"wrap"}}>
-                          {t.tech.map(tc=><span key={tc} style={{background:"#020d18",border:`1px solid ${t.color}40`,borderRadius:3,padding:"2px 8px",fontSize:15,color:t.color}}>{tc}</span>)}
+                        {t.scope.map((sc,i)=><div key={i} style={{display:"flex",gap:6,background:"#030c18",border:`1px solid ${t.color}1a`,borderRadius:4,padding:"6px 10px",marginBottom:5}}><span style={{color:t.color,fontSize:11,flexShrink:0}}>▸</span><span style={{fontSize:12,color:"#7a9aba"}}>{sc}</span></div>)}
+                        <div style={{marginTop:10,display:"flex",gap:4,flexWrap:"wrap"}}>
+                          {t.tech.map(tc=><span key={tc} style={{background:"#020d18",border:`1px solid ${t.color}40`,borderRadius:3,padding:"2px 7px",fontSize:10,color:t.color}}>{tc}</span>)}
                         </div>
                       </div>
                     )}
-                    {thesisTab==="topo"&&<pre style={{background:"#010810",borderRadius:7,padding:"12px",fontSize:16,color:"#00d4ff",lineHeight:1.9,overflowX:"auto",borderLeft:`3px solid ${t.color}`}}>{t.topo}</pre>}
-                    {thesisTab==="deploy"&&(
+                    {thesisTab==="topo" && (
                       <div>
-                        {t.deploy.map((d,i)=>(
-                          <div key={i} style={{display:"flex",gap:8,marginBottom:7}}>
-                            <div style={{width:22,height:22,borderRadius:4,background:`${t.color}15`,border:`1px solid ${t.color}50`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,color:t.color,flexShrink:0,fontWeight:700}}>{i+1}</div>
-                            <span style={{fontSize:16,color:"#7a9aba",lineHeight:1.7}}>{d}</span>
-                          </div>
-                        ))}
+                        {t.deploy.map((d,i)=><div key={i} style={{display:"flex",gap:8,marginBottom:6}}><div style={{width:20,height:20,borderRadius:4,background:`${t.color}15`,border:`1px solid ${t.color}50`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,color:t.color,flexShrink:0,fontWeight:700}}>{i+1}</div><span style={{fontSize:12,color:"#7a9aba",lineHeight:1.7}}>{d}</span></div>)}
                       </div>
                     )}
-                    {thesisTab==="result"&&(
+                    {thesisTab==="result" && (
                       <div>
-                        {t.result.map((r,i)=>(
-                          <div key={i} style={{display:"flex",gap:8,marginBottom:6,background:"#031208",border:"1px solid #0a2018",borderRadius:4,padding:"7px 10px"}}>
-                            <span style={{color:"#10b981",fontSize:13,flexShrink:0}}>✓</span>
-                            <span style={{fontSize:16,color:"#6ab09a"}}>{r}</span>
-                          </div>
-                        ))}
+                        {t.result.map((r,i)=><div key={i} style={{display:"flex",gap:8,marginBottom:6,background:"#031208",border:"1px solid #0a2018",borderRadius:4,padding:"6px 10px"}}><span style={{color:"#10b981",fontSize:11,flexShrink:0}}>✓</span><span style={{fontSize:12,color:"#6ab09a"}}>{r}</span></div>)}
                       </div>
                     )}
                   </div>
@@ -850,79 +1489,444 @@ export default function App(){
         )}
 
         {/* GUIDE */}
-        {view==="guide"&&(
-          <div className="fade">
-            <div className="section-title" style={{fontFamily:"Rajdhani,sans-serif",fontWeight:700,fontSize:16,color:"#3a6a8a",letterSpacing:3,marginBottom:12}}>▸ HƯỚNG DẪN NHANH</div>
-            <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(280px,1fr))",gap:10,marginBottom:14}}>
+        {view==="guide" && (
+          <div>
+            <div style={{fontFamily:"Rajdhani,sans-serif",fontWeight:700,fontSize:13,color:"#3a6a8a",letterSpacing:3,marginBottom:12}}>▸ HƯỚNG DẪN NHANH NGN/IPv6</div>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(260px,1fr))",gap:10,marginBottom:14}}>
               {[
-                {t:"🚀 Khởi Động EVE-NG",c:"#00d4ff",items:["Truy cập EVE-NG Web UI: http://EVE-NG-IP","Tạo New Lab → Add Node → Cisco IOL","Kết nối nodes bằng drag-and-drop","Start all nodes, đợi boot ~30s","Click node → Console để terminal","File → Save (Ctrl+S) lưu lab"]},
-                {t:"⚙️ Cấu Hình IPv6 Nhanh",c:"#10b981",items:["enable → configure terminal","ipv6 unicast-routing (bắt buộc!)","ipv6 cef (Cisco Express Forwarding)","interface Gi0/0 → ipv6 address X/prefix","ipv6 address FE80::1 link-local","no shutdown → end → wr"]},
-                {t:"🔍 Debug IPv6",c:"#f59e0b",items:["show ipv6 interface brief","show ipv6 neighbors (NDP cache)","show ipv6 route (routing table)","ping ipv6 X source Y repeat 100","traceroute ipv6 X source Y","debug ipv6 icmp / debug ipv6 ospf"]},
-                {t:"📡 OSPFv3 Reference",c:"#7c3aed",items:["ipv6 router ospf 1 → router-id X.X.X.X","interface Gi0/0 → ipv6 ospf 1 area 0","show ipv6 ospf neighbor (Full = OK)","show ipv6 ospf database","clear ipv6 ospf process","debug ipv6 ospf adj"]},
-                {t:"🌍 BGP IPv6 Checklist",c:"#ff6b35",items:["router bgp 65001 + no bgp default ipv4-unicast","neighbor X remote-as Y (IPv6 addr)","address-family ipv6 → neighbor activate","network 2001:db8::/32","show bgp ipv6 unicast summary","clear bgp ipv6 unicast * soft"]},
-                {t:"📞 VoIP Troubleshoot",c:"#a855f7",items:["show ephone registered","show dial-peer voice summary","debug ccsip messages (SIP trace)","debug ephone detail (SCCP)","show call active voice brief","pjsip set logger on (FreePBX)"]},
-                {t:"⚡ QoS Verification",c:"#f59e0b",items:["show policy-map interface Gi0/0 input","show policy-map interface Gi0/0 output","show class-map","show queue GigabitEthernet0/0","show interface Gi0/0 | include drop","show ip sla statistics"]},
-                {t:"🔒 Security Commands",c:"#10b981",items:["show ipv6 nd raguard policy","show ipv6 dhcp snooping","show ipv6 source-guard policy","show ip verify source (uRPF)","fail2ban-client status asterisk","show ip access-lists"]}
+                {t:"🚀 Khởi Động EVE-NG",c:"#00d4ff",items:["Truy cập EVE-NG Web UI: http://EVE-NG-IP","Tạo New Lab → Add Node → Cisco IOL","Kết nối nodes bằng drag-and-drop","Start all nodes, đợi boot ~30s","ipv6 unicast-routing (bắt buộc)","show ipv6 interface brief"]},
+                {t:"⚙️ IPv6 Quick Config",c:"#10b981",items:["ipv6 unicast-routing + ipv6 cef","interface Gi0/0 → ipv6 address X/prefix","ipv6 address FE80::1 link-local","no shutdown → end → wr","ping ipv6 X source Y","show ipv6 neighbors"]},
+                {t:"🔍 Debug IPv6",c:"#f59e0b",items:["show ipv6 interface brief","show ipv6 neighbors (NDP cache)","show ipv6 route (routing table)","ping ipv6 X source Y repeat 100","traceroute ipv6 X source Y","debug ipv6 icmp"]},
+                {t:"📡 OSPFv3",c:"#7c3aed",items:["ipv6 router ospf 1 → router-id X","interface Gi0/0 → ipv6 ospf 1 area 0","show ipv6 ospf neighbor (Full=OK)","show ipv6 ospf database","clear ipv6 ospf process","debug ipv6 ospf adj"]},
               ].map((card,i)=>(
                 <div key={i} style={{background:"#040f18",border:`1px solid ${card.c}22`,borderLeft:`3px solid ${card.c}`,borderRadius:7,padding:"12px"}}>
-                  <div style={{fontFamily:"Rajdhani,sans-serif",fontWeight:700,fontSize:13,color:card.c,marginBottom:8}}>{card.t}</div>
-                  {card.items.map((item,j)=>(
-                    <div key={j} style={{display:"flex",gap:6,marginBottom:5}}>
-                      <span style={{color:card.c,fontSize:16,flexShrink:0,marginTop:2}}>▸</span>
-                      <code style={{fontSize:15,color:"#6a9aba",lineHeight:1.6,fontFamily:"Share Tech Mono,monospace",wordBreak:"break-all"}}>{item}</code>
-                    </div>
-                  ))}
+                  <div style={{fontFamily:"Rajdhani,sans-serif",fontWeight:700,fontSize:12,color:card.c,marginBottom:8}}>{card.t}</div>
+                  {card.items.map((item,j)=><div key={j} style={{display:"flex",gap:5,marginBottom:4}}><span style={{color:card.c,fontSize:10,flexShrink:0,marginTop:2}}>▸</span><code style={{fontSize:11,color:"#6a9aba",lineHeight:1.5,fontFamily:"Share Tech Mono,monospace",wordBreak:"break-all"}}>{item}</code></div>)}
                 </div>
               ))}
             </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
 
-            {/* Verify Table */}
-            <div style={{background:"#040f18",border:"1px solid #0a2a40",borderRadius:8,overflow:"hidden"}}>
+// ============================================================
+// SDN COURSE VIEW
+// ============================================================
+function SDNCourse() {
+  const [view, setView] = useState("chapters");
+  const [expChap, setExpChap] = useState(null);
+  const [chapTab, setChapTab] = useState("theory");
+  const [expTheory, setExpTheory] = useState(null);
+  const [expLab, setExpLab] = useState(null);
+  const [expThesis, setExpThesis] = useState(null);
+  const [thesisTab, setThesisTab] = useState("overview");
+  const [filter, setFilter] = useState("all");
+  const filtered = filter==="all" ? SDN_THESIS : SDN_THESIS.filter(t=>t.level===filter);
+
+  return (
+    <div>
+      {/* Sub Nav */}
+      <div style={{display:"flex", borderBottom:"1px solid #0a2a40", background:"#030e1a", overflowX:"auto"}}>
+        {[["chapters","📚","Nội Dung & Labs"],["thesis","🎓","Đề Tài SDN"],["rubric","📋","Rubric & Điểm"],["guide","📖","Hướng Dẫn"]].map(([k,ic,l])=>(
+          <button key={k} onClick={()=>setView(k)} style={{
+            background:view===k?"#041a2a":"transparent",
+            border:"none", borderBottom:view===k?"2px solid #38bdf8":"2px solid transparent",
+            color:view===k?"#38bdf8":"#3a6a8a",
+            padding:"9px 14px", fontSize:12, cursor:"pointer", transition:"all 0.2s", flexShrink:0, whiteSpace:"nowrap"
+          }}>{ic} {l}</button>
+        ))}
+      </div>
+
+      <div style={{padding:"14px"}}>
+        {/* CHAPTERS */}
+        {view==="chapters" && (
+          <div>
+            {/* Course Info Banner */}
+            <div style={{background:"#040f18", border:"1px solid #0a2030", borderLeft:"4px solid #38bdf8", borderRadius:8, padding:"12px 14px", marginBottom:14}}>
+              <div style={{display:"flex", gap:12, flexWrap:"wrap", alignItems:"flex-start"}}>
+                <div style={{flex:1}}>
+                  <div style={{fontFamily:"Rajdhani,sans-serif",fontWeight:700,fontSize:15,color:"#38bdf8"}}>CHUYÊN ĐỀ MẠNG MÁY TÍNH 1 · 20CT3124</div>
+                  <div style={{fontSize:11,color:"#3a6a8a",marginTop:3}}>Mã HP: 20CT3124 · 4 tín chỉ (2-0-2) · Tự chọn · Tiên quyết: Mạng Máy Tính</div>
+                  <div style={{display:"flex",gap:12,marginTop:8,flexWrap:"wrap"}}>
+                    {[["📖","30 tiết LT"],["💻","60 tiết TH"],["🏠","60 giờ Tự học"],["👨‍🏫","Vũ Minh Quan"]].map(([ic,l])=>(
+                      <span key={l} style={{fontSize:11,color:"#4a8a9a"}}>
+                        {ic} {l}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                <div style={{display:"flex",gap:6,flexWrap:"wrap",justifyContent:"flex-end"}}>
+                  {[["📊","50% QT"],["📝","50% Thi"]].map(([ic,l])=>(
+                    <div key={l} style={{background:"#38bdf815",border:"1px solid #38bdf840",borderRadius:5,padding:"4px 10px",fontSize:11,color:"#38bdf8",textAlign:"center"}}>
+                      {ic} {l}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div style={{fontFamily:"Rajdhani,sans-serif",fontWeight:700,fontSize:13,color:"#3a6a8a",letterSpacing:3,marginBottom:12}}>▸ 6 CHƯƠNG · LÝ THUYẾT + LABS</div>
+            {SDN_CHAPTERS.map(chap => (
+              <div key={chap.id} style={{marginBottom:8}}>
+                <div onClick={()=>{setExpChap(expChap===chap.id?null:chap.id);setChapTab("theory");setExpTheory(null);setExpLab(null);}} style={{
+                  background:"#040f18", borderRadius:expChap===chap.id?"8px 8px 0 0":8,
+                  padding:"12px 14px", cursor:"pointer",
+                  border:`1px solid ${expChap===chap.id?chap.color:"#0a2030"}`,
+                  borderLeft:`4px solid ${chap.color}`, transition:"all 0.18s"
+                }}>
+                  <div style={{display:"flex", alignItems:"center", gap:10}}>
+                    <div style={{fontSize:18, width:34, height:34, display:"flex", alignItems:"center", justifyContent:"center", background:`${chap.color}12`, border:`1px solid ${chap.color}30`, borderRadius:6, flexShrink:0}}>{chap.icon}</div>
+                    <div style={{flex:1}}>
+                      <div style={{color:chap.color, fontWeight:700, fontSize:13, marginBottom:2}}>CHƯƠNG {chap.id}</div>
+                      <div style={{fontFamily:"Rajdhani,sans-serif", fontWeight:700, fontSize:14, color:"#d0e8ff"}}>{chap.title}</div>
+                      <div style={{fontSize:11, color:"#3a6a8a", marginTop:2}}>{chap.desc}</div>
+                    </div>
+                    <div style={{display:"flex", gap:4, flexShrink:0}}>
+                      <span style={{background:`${chap.color}15`, border:`1px solid ${chap.color}40`, borderRadius:3, padding:"1px 6px", fontSize:10, color:chap.color}}>{chap.theory.length} Bài LT</span>
+                      <span style={{background:"#1a3a5a22", border:"1px solid #2a4a6a", borderRadius:3, padding:"1px 6px", fontSize:10, color:"#4a8a9a"}}>{chap.labs.length} Labs</span>
+                    </div>
+                    <span style={{color:chap.color, fontSize:12, marginLeft:4, flexShrink:0}}>{expChap===chap.id?"▲":"▼"}</span>
+                  </div>
+                </div>
+
+                {expChap===chap.id && (
+                  <div style={{background:"#030b16", border:`1px solid ${chap.color}1a`, borderTop:"none", borderRadius:"0 0 8px 8px"}}>
+                    {/* Tab bar */}
+                    <div style={{display:"flex", gap:4, padding:"10px 14px", borderBottom:"1px solid #0a1828"}}>
+                      {[["theory","📖 Lý Thuyết"],["labs","🔬 Labs"]].map(([k,l])=>(
+                        <button key={k} onClick={e=>{e.stopPropagation();setChapTab(k);}} style={{
+                          background:chapTab===k?`${chap.color}1a`:"#030c18",
+                          border:`1px solid ${chapTab===k?chap.color:"#0a1828"}`,
+                          color:chapTab===k?chap.color:"#3a6a8a",
+                          padding:"5px 12px", borderRadius:4, fontSize:12, cursor:"pointer", whiteSpace:"nowrap"
+                        }}>{l}</button>
+                      ))}
+                    </div>
+
+                    {chapTab==="theory" && (
+                      <div style={{padding:"0"}}>
+                        {chap.theory.map((th,ti) => (
+                          <div key={ti}>
+                            <div onClick={()=>setExpTheory(expTheory===`${chap.id}-${ti}`?null:`${chap.id}-${ti}`)} style={{
+                              padding:"10px 14px", borderBottom:"1px solid #0a1828",
+                              cursor:"pointer", display:"flex", alignItems:"center", gap:8
+                            }}>
+                              <span style={{color:chap.color, fontSize:11, flexShrink:0}}>§</span>
+                              <span style={{fontSize:13, color:"#b0cce0", fontFamily:"Rajdhani,sans-serif", fontWeight:600, flex:1}}>{th.title}</span>
+                              <span style={{color:"#1a3a5a", fontSize:12}}>{expTheory===`${chap.id}-${ti}`?"▲":"▼"}</span>
+                            </div>
+                            {expTheory===`${chap.id}-${ti}` && (
+                              <div style={{padding:"12px 14px 14px", background:"#020910", borderBottom:"1px solid #0a1828"}}>
+                                <pre style={{
+                                  background:"#010810", borderRadius:7, padding:"14px",
+                                  fontSize:11, color:"#c0d8f0", lineHeight:2,
+                                  overflowX:"auto", borderLeft:`3px solid ${chap.color}`,
+                                  margin:0, whiteSpace:"pre-wrap", wordBreak:"break-word",
+                                  fontFamily:"Share Tech Mono,monospace"
+                                }}>{th.content}</pre>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {chapTab==="labs" && (
+                      <div>
+                        {chap.labs.map((lab, li) => (
+                          <LabCard
+                            key={li}
+                            lab={lab}
+                            color={chap.color}
+                            isOpen={expLab===`${chap.id}-${li}`}
+                            onToggle={()=>setExpLab(expLab===`${chap.id}-${li}`?null:`${chap.id}-${li}`)}
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* THESIS */}
+        {view==="thesis" && (
+          <div>
+            <div style={{display:"flex", alignItems:"center", gap:8, marginBottom:12, flexWrap:"wrap"}}>
+              <div style={{fontFamily:"Rajdhani,sans-serif",fontWeight:700,fontSize:13,color:"#3a6a8a",letterSpacing:3}}>{filtered.length} ĐỀ TÀI SDN</div>
+              <div style={{display:"flex", gap:5, marginLeft:"auto", flexWrap:"wrap"}}>
+                {[["all","Tất Cả","#38bdf8"],["easy","Cơ Bản","#4ade80"],["medium","Đồ Án","#f59e0b"],["hard","Nâng Cao","#f472b6"]].map(([k,l,c])=>(
+                  <button key={k} onClick={()=>setFilter(k)} style={{background:filter===k?`${c}18`:"#050f18",border:`1px solid ${filter===k?c:"#1a3050"}`,color:filter===k?c:"#3a6a8a",padding:"4px 9px",borderRadius:4,fontSize:11,cursor:"pointer",whiteSpace:"nowrap"}}>{l}</button>
+                ))}
+              </div>
+            </div>
+            {filtered.map(t => (
+              <div key={t.id} style={{marginBottom:8}}>
+                <div onClick={()=>{setExpThesis(expThesis===t.id?null:t.id);setThesisTab("overview");}} style={{background:"#040f18",borderRadius:expThesis===t.id?"8px 8px 0 0":8,padding:"12px 14px",cursor:"pointer",border:`1px solid ${expThesis===t.id?t.color:"#0a2030"}`,borderLeft:`4px solid ${t.color}`,transition:"all 0.18s"}}>
+                  <div style={{display:"flex",alignItems:"center",gap:10}}>
+                    <div style={{fontSize:20,width:36,height:36,display:"flex",alignItems:"center",justifyContent:"center",background:`${t.color}12`,border:`1px solid ${t.color}30`,borderRadius:7,flexShrink:0}}>{t.icon}</div>
+                    <div style={{flex:1}}>
+                      <div style={{display:"flex",gap:6,alignItems:"center",marginBottom:2,flexWrap:"wrap"}}>
+                        <span style={{color:t.color,fontWeight:700,fontSize:13}}>ĐỀ TÀI {t.id}</span>
+                        <span style={{background:`${t.color}15`,border:`1px solid ${t.color}40`,borderRadius:3,padding:"1px 6px",fontSize:10,color:t.color}}>{t.level==="easy"?"⭐⭐":t.level==="medium"?"⭐⭐⭐":"⭐⭐⭐⭐⭐"} {t.level==="easy"?"Cơ Bản":t.level==="medium"?"Đồ Án":"Nâng Cao"}</span>
+                      </div>
+                      <div style={{fontFamily:"Rajdhani,sans-serif",fontWeight:700,fontSize:13,color:"#d0e8ff"}}>{t.title}</div>
+                      <div style={{display:"flex",gap:10,marginTop:2}}>
+                        <span style={{fontSize:11,color:"#3a6a8a"}}>⏱ {t.dur}</span>
+                        <span style={{fontSize:11,color:"#3a6a8a"}}>👥 {t.team}</span>
+                      </div>
+                    </div>
+                    <span style={{color:t.color,fontSize:12,flexShrink:0}}>{expThesis===t.id?"▲":"▼"}</span>
+                  </div>
+                </div>
+                {expThesis===t.id && (
+                  <div style={{background:"#030b16",border:`1px solid ${t.color}1a`,borderTop:"none",borderRadius:"0 0 8px 8px",padding:"14px"}}>
+                    <div style={{display:"flex",gap:4,marginBottom:12,flexWrap:"wrap"}}>
+                      {[["overview","📋 Tổng Quan"],["code","💻 Code Mẫu"],["result","✅ Kết Quả"]].map(([k,l])=>(
+                        <button key={k} onClick={e=>{e.stopPropagation();setThesisTab(k);}} style={{background:thesisTab===k?`${t.color}1a`:"#030c18",border:`1px solid ${thesisTab===k?t.color:"#0a1828"}`,color:thesisTab===k?t.color:"#3a6a8a",padding:"4px 9px",borderRadius:4,fontSize:11,whiteSpace:"nowrap",cursor:"pointer"}}>{l}</button>
+                      ))}
+                    </div>
+                    {thesisTab==="overview" && (
+                      <div>
+                        <div style={{background:`${t.color}08`,border:`1px solid ${t.color}1a`,borderRadius:6,padding:"10px 12px",marginBottom:10}}>
+                          <div style={{fontSize:11,color:t.color,fontWeight:700,marginBottom:4}}>TỔNG QUAN</div>
+                          <div style={{fontSize:12,color:"#7a9aba",lineHeight:1.7}}>{t.overview}</div>
+                        </div>
+                        {t.scope.map((sc,i)=><div key={i} style={{display:"flex",gap:6,background:"#030c18",border:`1px solid ${t.color}1a`,borderRadius:4,padding:"6px 10px",marginBottom:4}}><span style={{color:t.color,fontSize:11}}>▸</span><span style={{fontSize:12,color:"#7a9aba"}}>{sc}</span></div>)}
+                        <div style={{marginTop:10,display:"flex",gap:4,flexWrap:"wrap"}}>
+                          {t.tech.map(tc=><span key={tc} style={{background:"#020d18",border:`1px solid ${t.color}40`,borderRadius:3,padding:"2px 7px",fontSize:10,color:t.color}}>{tc}</span>)}
+                        </div>
+                      </div>
+                    )}
+                    {thesisTab==="code" && (
+                      <pre style={{background:"#010810",borderRadius:7,padding:"12px",fontSize:11,color:"#00e5aa",lineHeight:1.8,overflowX:"auto",borderLeft:`3px solid ${t.color}`,margin:0}}>{t.code}</pre>
+                    )}
+                    {thesisTab==="result" && (
+                      <div>
+                        {t.result.map((r,i)=><div key={i} style={{display:"flex",gap:8,marginBottom:6,background:"#031208",border:"1px solid #0a2018",borderRadius:4,padding:"6px 10px"}}><span style={{color:"#10b981",fontSize:11}}>✓</span><span style={{fontSize:12,color:"#6ab09a"}}>{r}</span></div>)}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* RUBRIC */}
+        {view==="rubric" && (
+          <div>
+            <div style={{fontFamily:"Rajdhani,sans-serif",fontWeight:700,fontSize:13,color:"#3a6a8a",letterSpacing:3,marginBottom:12}}>▸ RUBRIC & THANG ĐIỂM</div>
+
+            {/* Điểm tổng */}
+            <div style={{background:"#040f18",border:"1px solid #38bdf822",borderLeft:"4px solid #38bdf8",borderRadius:8,padding:"12px 14px",marginBottom:12}}>
+              <div style={{fontFamily:"Rajdhani,sans-serif",fontWeight:700,fontSize:13,color:"#38bdf8",marginBottom:10}}>CẤU TRÚC ĐIỂM (10 điểm)</div>
+              <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(200px,1fr))",gap:8}}>
+                {[
+                  {name:"Thảo luận lớp",pct:"10%",note:"Từng buổi học",cdr:"CĐR1,2,8",c:"#38bdf8"},
+                  {name:"Thực hành (1-8)",pct:"10%",note:"Từng buổi",cdr:"CĐR1-6,8",c:"#4ade80"},
+                  {name:"Kiểm tra giữa kỳ",pct:"15%",note:"Buổi 4",cdr:"CĐR1-4",c:"#fb923c"},
+                  {name:"Bài tập nhóm",pct:"15%",note:"Buổi 7,8",cdr:"CĐR1-8",c:"#c084fc"},
+                  {name:"Thi cuối kỳ",pct:"50%",note:"Tự luận",cdr:"CĐR1-6",c:"#f472b6"},
+                ].map((item,i)=>(
+                  <div key={i} style={{background:"#020d18",border:`1px solid ${item.c}22`,borderRadius:6,padding:"10px 12px"}}>
+                    <div style={{fontFamily:"Rajdhani,sans-serif",fontWeight:700,fontSize:12,color:item.c}}>{item.name}</div>
+                    <div style={{fontSize:22,color:item.c,fontWeight:700,margin:"4px 0"}}>{item.pct}</div>
+                    <div style={{fontSize:10,color:"#3a5a7a"}}>{item.note}</div>
+                    <div style={{fontSize:10,color:"#2a4a6a",marginTop:2}}>{item.cdr}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Rubric thực hành */}
+            <div style={{background:"#040f18",border:"1px solid #0a2a40",borderRadius:8,overflow:"hidden",marginBottom:12}}>
               <div style={{background:"#030e1a",padding:"8px 14px",borderBottom:"1px solid #0a2a40"}}>
-                <span style={{fontFamily:"Rajdhani,sans-serif",fontWeight:700,fontSize:13,color:"#00d4ff"}}>📋 BẢNG VERIFY ĐẦY ĐỦ</span>
+                <span style={{fontFamily:"Rajdhani,sans-serif",fontWeight:700,fontSize:12,color:"#4ade80"}}>📋 RUBRIC KỸ NĂNG THỰC HÀNH</span>
               </div>
               <div style={{overflowX:"auto"}}>
-                <table style={{width:"100%",borderCollapse:"collapse",minWidth:480}}>
+                <table style={{width:"100%",borderCollapse:"collapse",minWidth:500}}>
                   <thead>
                     <tr style={{background:"#030c18"}}>
-                      {["Feature","Lệnh Verify","Kết Quả Mong Đợi"].map(h=>(
-                        <th key={h} style={{padding:"7px 12px",textAlign:"left",fontSize:15,color:"#3a6a8a",fontWeight:700,borderBottom:"1px solid #0a2a40",whiteSpace:"nowrap"}}>{h}</th>
+                      {["Bài TH","Trọng Số","Giỏi (8.5-10)","Khá (7-8.4)","TB (5-6.9)","Yếu (<5)"].map(h=>(
+                        <th key={h} style={{padding:"7px 10px",textAlign:"left",fontSize:11,color:"#3a6a8a",fontWeight:700,borderBottom:"1px solid #0a2a40",whiteSpace:"nowrap"}}>{h}</th>
                       ))}
                     </tr>
                   </thead>
                   <tbody>
                     {[
-                      ["IPv6 Interface","show ipv6 interface brief","UP/UP, global+link-local"],
-                      ["OSPFv3 Neighbor","show ipv6 ospf neighbor","FULL/DR hoặc FULL/BDR"],
-                      ["BGP Session","show bgp ipv6 unicast summary","Established"],
-                      ["HSRP","show standby brief","Active/Standby đúng priority"],
-                      ["DHCPv6","show ipv6 dhcp binding","IAID + địa chỉ đầy đủ"],
-                      ["PIM Neighbor","show ipv6 pim neighbor","Neighbors + uptime"],
-                      ["Multicast","show ipv6 mroute","(*,G) và (S,G) entries"],
-                      ["QoS Policy","show policy-map interface","Hit counters tăng"],
-                      ["CME Phones","show ephone registered","MAC, IP, extension"],
-                      ["SIP Trunk","show sip-ua status registrar","Registered: Yes"],
-                      ["FreePBX","pjsip show endpoints","Status: Online"],
+                      ["TH1: Python cơ bản","10%","Hoàn thành + Python OK","Hiểu SDN, chưa TH đủ","Hiểu SDN, chưa Python","Không hoàn thành"],
+                      ["TH2: JSON & API","20%","JSON + API thành công","JSON OK, API chưa đủ","Chưa hiểu API/JSON","Không hoàn thành"],
+                      ["TH3: Service Ticket","20%","Postman + Python OK","1 trong 2 thành công","Còn lỗi cả 2","Không hoàn thành"],
+                      ["TH4: Thu thập TT","20%","2 tool thành công","1 tool, còn lỗi","Dữ liệu chưa đúng","Không hoàn thành"],
+                      ["TH5: Full App","20%","API + Python hoàn chỉnh","Chỉ 1 tool OK","Trích xuất còn lỗi","Không hoàn thành"],
+                      ["TH6: Báo cáo","10%","Báo cáo hoàn tất","Thiếu một số phần","Còn nhiều lỗi","Không nộp"],
                     ].map((row,i)=>(
                       <tr key={i} style={{borderBottom:"1px solid #0a1828",background:i%2===0?"#030b16":"#020910"}}>
-                        <td style={{padding:"7px 12px",fontSize:16,color:"#c0d8f0",whiteSpace:"nowrap"}}>{row[0]}</td>
-                        <td style={{padding:"7px 12px"}}><code style={{fontSize:15,color:"#00e5aa",fontFamily:"Share Tech Mono,monospace"}}>{row[1]}</code></td>
-                        <td style={{padding:"7px 12px",fontSize:15,color:"#5a8a7a"}}>{row[2]}</td>
+                        {row.map((cell,j)=>(
+                          <td key={j} style={{padding:"6px 10px",fontSize:11,color:j===0?"#c0d8f0":j===1?"#4ade80":j===2?"#38bdf8":j===3?"#fb923c":j===4?"#f59e0b":"#ef4444",whiteSpace:j<2?"nowrap":"normal"}}>{cell}</td>
+                        ))}
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
             </div>
+
+            {/* Chuẩn đầu ra */}
+            <div style={{background:"#040f18",border:"1px solid #0a2a40",borderRadius:8,overflow:"hidden"}}>
+              <div style={{background:"#030e1a",padding:"8px 14px",borderBottom:"1px solid #0a2a40"}}>
+                <span style={{fontFamily:"Rajdhani,sans-serif",fontWeight:700,fontSize:12,color:"#38bdf8"}}>🎯 CHUẨN ĐẦU RA HỌC PHẦN</span>
+              </div>
+              <div style={{padding:"14px"}}>
+                {[
+                  {cdr:"CĐR1",desc:"Hiểu kiến thức cơ bản về SDN và các mô hình thực tế",level:"T"},
+                  {cdr:"CĐR2",desc:"Phân tích vai trò từng tầng trong mô hình SDN",level:"T"},
+                  {cdr:"CĐR3",desc:"Xây dựng ứng dụng tạo bộ điều khiển mạng cơ bản",level:"T"},
+                  {cdr:"CĐR4",desc:"Phân tích yêu cầu và xây dựng SDN controller",level:"T"},
+                  {cdr:"CĐR5",desc:"Thử nghiệm, phân tích dữ liệu mạng",level:"T"},
+                  {cdr:"CĐR6",desc:"Trình bày báo cáo, thuyết trình, làm việc nhóm",level:"T"},
+                  {cdr:"CĐR7",desc:"Thái độ ham học hỏi, nhiệt tình, nghiêm túc",level:"TU"},
+                  {cdr:"CĐR8",desc:"Ý thức học tập tốt, chủ động",level:"U"},
+                ].map((item,i)=>(
+                  <div key={i} style={{display:"flex",gap:10,marginBottom:8,padding:"8px 10px",background:"#020910",borderRadius:5,border:"1px solid #0a1828",alignItems:"center"}}>
+                    <span style={{background:"#38bdf815",border:"1px solid #38bdf840",borderRadius:4,padding:"2px 8px",fontSize:11,color:"#38bdf8",flexShrink:0,fontWeight:700}}>{item.cdr}</span>
+                    <span style={{fontSize:12,color:"#7a9aba",flex:1}}>{item.desc}</span>
+                    <span style={{background:"#4ade8015",border:"1px solid #4ade8030",borderRadius:3,padding:"1px 6px",fontSize:10,color:"#4ade80",flexShrink:0}}>{item.level}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* GUIDE */}
+        {view==="guide" && (
+          <div>
+            <div style={{fontFamily:"Rajdhani,sans-serif",fontWeight:700,fontSize:13,color:"#3a6a8a",letterSpacing:3,marginBottom:12}}>▸ HƯỚNG DẪN CHUYÊN ĐỀ MMT 1</div>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(260px,1fr))",gap:10}}>
+              {[
+                {t:"🐍 Python Quick Ref",c:"#4ade80",items:["python3 --version","pip install requests pandas","import requests, json","response.json() → dict","json.dump(data, f, indent=2)","f-string: f'{var} text'"]},
+                {t:"🌐 APIC-EM API",c:"#38bdf8",items:["BASE: https://sandboxapicem.cisco.com","POST /api/v1/ticket → token","GET /api/v1/network-device","GET /api/v1/topology/physical-topology","POST /api/v1/flow-analysis","Header: X-Auth-Token: <token>"]},
+                {t:"🔧 Postman Tips",c:"#fb923c",items:["New Request → POST Auth first","Copy serviceTicket value","Set Environment Variable: token","Use {{token}} in headers","Save to Collection","Export để nộp bài"]},
+                {t:"🧪 Debug Python",c:"#c084fc",items:["print(response.status_code)","print(response.json())","import pdb; pdb.set_trace()","try/except requests.exceptions","requests.packages.urllib3.disable_warnings()","response.raise_for_status()"]},
+                {t:"📁 Project Structure",c:"#f472b6",items:["network_manager.py (main class)","config.py (BASE_URL, credentials)","utils.py (helpers)","reports/ (output files)","tests/ (test scripts)","README.md (documentation)"]},
+                {t:"📝 Báo Cáo Nhóm",c:"#34d399",items:["Format: PDF, Arial 12, 1.5 spacing","Trang bìa + Mục lục bắt buộc","Code: monospace font, có comment","Screenshots: annotated","Min 10 trang nội dung","Slide: 10 slide, 10 phút trình bày"]},
+              ].map((card,i)=>(
+                <div key={i} style={{background:"#040f18",border:`1px solid ${card.c}22`,borderLeft:`3px solid ${card.c}`,borderRadius:7,padding:"12px"}}>
+                  <div style={{fontFamily:"Rajdhani,sans-serif",fontWeight:700,fontSize:12,color:card.c,marginBottom:8}}>{card.t}</div>
+                  {card.items.map((item,j)=><div key={j} style={{display:"flex",gap:5,marginBottom:4}}><span style={{color:card.c,fontSize:10,flexShrink:0,marginTop:2}}>▸</span><code style={{fontSize:11,color:"#6a9aba",lineHeight:1.5,fontFamily:"Share Tech Mono,monospace",wordBreak:"break-all"}}>{item}</code></div>)}
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+// ============================================================
+// MAIN APP
+// ============================================================
+export default function App() {
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [course, setCourse] = useState("ngn"); // "ngn" | "sdn"
+
+  useEffect(() => {
+    if (localStorage.getItem("auth") === "true") setLoggedIn(true);
+  }, []);
+
+  if (!loggedIn) return <Login onLogin={()=>setLoggedIn(true)} />;
+
+  return (
+    <div style={{background:"#020d18", minHeight:"100vh", fontFamily:"'Share Tech Mono','Courier New',monospace", color:"#c0d8f0", width:"100%", overflowX:"hidden"}}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@600;700&display=swap');
+        *{box-sizing:border-box;margin:0;padding:0}
+        ::-webkit-scrollbar{width:4px;height:4px}
+        ::-webkit-scrollbar-track{background:#020d18}
+        ::-webkit-scrollbar-thumb{background:#00d4ff22;border-radius:2px}
+        @keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+        .fade{animation:fadeIn 0.2s ease}
+        @keyframes pulse{0%,100%{opacity:.5}50%{opacity:1}}
+        .pulse{animation:pulse 2.5s infinite}
+        pre{white-space:pre-wrap;word-break:break-all;font-family:'Share Tech Mono',monospace}
+        button{cursor:pointer;font-family:inherit}
+      `}</style>
+
+      {/* HEADER */}
+      <div style={{background:"linear-gradient(180deg,#091e30 0%,#020d18 100%)", borderBottom:"1px solid #00d4ff1a", padding:"10px 16px", display:"flex", alignItems:"center", gap:10}}>
+        <div style={{width:38, height:38, borderRadius:7, background:"#00d4ff12", border:"1.5px solid #00d4ff33", display:"flex", alignItems:"center", justifyContent:"center", fontSize:16, flexShrink:0}}>🌐</div>
+        <div style={{flex:1}}>
+          <div style={{fontFamily:"Rajdhani,sans-serif", fontWeight:700, fontSize:15, color:"#00d4ff", letterSpacing:2}}>DLU NETWORK LAB PORTAL</div>
+          <div style={{fontSize:11, color:"#1a5a7a", marginTop:1}}>Trường Đại học Đà Lạt · Khoa CNTT</div>
+        </div>
+        <div style={{display:"flex", gap:4, flexWrap:"wrap", justifyContent:"flex-end"}}>
+          {[["🟢","IPv6","#10b981"],["🐍","SDN","#38bdf8"],["📞","VoIP","#a855f7"]].map(([e,l,c])=>(
+            <div key={l} style={{background:"#0a1e2a", border:`1px solid ${c}33`, borderRadius:10, padding:"2px 8px", fontSize:11, color:c, display:"flex", gap:3, alignItems:"center"}}>
+              <span className="pulse">{e}</span><span>{l}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* INSTRUCTOR BAR */}
+      <div style={{background:"#040f1c", borderBottom:"1px solid #0a2a40", padding:"6px 16px", display:"flex", gap:8, alignItems:"center", fontSize:11, flexWrap:"wrap"}}>
+        <span>👨‍🏫</span>
+        <span style={{color:"#00d4ff", fontWeight:"bold"}}>Trần Vĩnh Phúc</span>
+        <span style={{color:"#1a3a5a"}}>|</span>
+        <a href="mailto:phuctv@dlu.edu.vn" style={{color:"#10b981", textDecoration:"none"}}>phuctv@dlu.edu.vn</a>
+        <span style={{color:"#1a3a5a"}}>|</span>
+        <span style={{color:"#3a6a8a"}}>Vũ Minh Quan</span>
+        <span style={{color:"#1a3a5a"}}>|</span>
+        <a href="mailto:quanvm@dlu.edu.vn" style={{color:"#38bdf8", textDecoration:"none"}}>quanvm@dlu.edu.vn</a>
+        <div style={{marginLeft:"auto", background:"#0a1e2a", border:"1px solid #00d4ff1a", borderRadius:10, padding:"2px 10px", fontSize:11, color:"#4a8a9a", whiteSpace:"nowrap"}}>2 Môn học · 31 Labs</div>
+      </div>
+
+      {/* COURSE SWITCHER */}
+      <div style={{padding:"12px 14px 0", background:"#030c18", borderBottom:"1px solid #0a2a40"}}>
+        <div style={{display:"flex", gap:6, marginBottom:0}}>
+          <button onClick={()=>setCourse("ngn")} style={{
+            background: course==="ngn" ? "#041a2a" : "#020910",
+            border: course==="ngn" ? "1px solid #00d4ff" : "1px solid #0a2030",
+            borderBottom: course==="ngn" ? "1px solid #041a2a" : "1px solid #0a2030",
+            borderRadius:"8px 8px 0 0", color: course==="ngn" ? "#00d4ff" : "#3a6a8a",
+            padding:"8px 16px", fontSize:12, fontWeight:700, transition:"all 0.2s",
+            display:"flex", alignItems:"center", gap:6
+          }}>
+            🌐 <span style={{fontFamily:"Rajdhani,sans-serif", letterSpacing:1}}>MẠNG THẾ HỆ MỚI & VoIP</span>
+            <span style={{background:course==="ngn"?"#00d4ff20":"#1a3a5a30", borderRadius:10, padding:"0 6px", fontSize:10}}>NGN/IPv6</span>
+          </button>
+          <button onClick={()=>setCourse("sdn")} style={{
+            background: course==="sdn" ? "#041a2a" : "#020910",
+            border: course==="sdn" ? "1px solid #38bdf8" : "1px solid #0a2030",
+            borderBottom: course==="sdn" ? "1px solid #041a2a" : "1px solid #0a2030",
+            borderRadius:"8px 8px 0 0", color: course==="sdn" ? "#38bdf8" : "#3a6a8a",
+            padding:"8px 16px", fontSize:12, fontWeight:700, transition:"all 0.2s",
+            display:"flex", alignItems:"center", gap:6
+          }}>
+            🧠 <span style={{fontFamily:"Rajdhani,sans-serif", letterSpacing:1}}>CHUYÊN ĐỀ MMT 1</span>
+            <span style={{background:course==="sdn"?"#38bdf820":"#1a3a5a30", borderRadius:10, padding:"0 6px", fontSize:10}}>SDN/Python</span>
+          </button>
+        </div>
+      </div>
+
+      {/* COURSE CONTENT */}
+      <div className="fade" key={course}>
+        {course==="ngn" ? <NGNCourse /> : <SDNCourse />}
+      </div>
 
       {/* FOOTER */}
-      <div style={{borderTop:"1px solid #0a2a40",padding:"8px 16px",display:"flex",justifyContent:"space-between",alignItems:"center",fontSize:15,color:"#1a4a6a",flexWrap:"wrap",gap:6}}>
-        <span>NGN/IPv6 Lab — ĐH Đà Lạt</span>
-        <span>GV: Trần Vĩnh Phúc | <a href="mailto:phuctv@dlu.edu.vn" style={{color:"#10b981"}}>phuctv@dlu.edu.vn</a></span>
-        <span className="desk-only">6 Modules · 25 Labs · 10 Đề Tài</span>
+      <div style={{borderTop:"1px solid #0a2a40", padding:"8px 16px", display:"flex", justifyContent:"space-between", alignItems:"center", fontSize:11, color:"#1a4a6a", flexWrap:"wrap", gap:6}}>
+        <span>DLU Network Lab Portal</span>
+        <span>© 2025 Đại học Đà Lạt · Khoa CNTT</span>
+        <span>NGN/IPv6 · SDN/Python · VoIP</span>
       </div>
     </div>
   );
