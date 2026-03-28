@@ -6,5 +6,6 @@ const base = process.env.VITE_BASE ?? '/'
 export default defineConfig({
   plugins: [react()],
   base,
+  base: "/ngn/",
   build: { sourcemap: false }
 })
