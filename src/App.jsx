@@ -41,10 +41,10 @@ function Login({ onLogin }) {
       <div style={S.card}>
         {/* LEFT */}
         <div style={S.left}>
-          <div style={S.logo}>AIoT</div>
-          <h2 style={S.title}>AIoT EDU</h2>
+          <div style={S.logo}>NGN</div>
+          <h2 style={S.title}>NGN EDU</h2>
           <p style={S.subtitle}>
-            Hệ thống học tập & nghiên cứu AIoT — DLU
+            Hệ thống học tập & nghiên cứu NGN — DLU
           </p>
 
           <form onSubmit={handleSubmit} style={{width:'100%'}}>
