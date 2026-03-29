@@ -23,7 +23,66 @@ const NAV = [
   { to:'/guide',     label:'Hướng dẫn'    },
   { to:'/contact',   label:'Liên hệ GV'   },
 ]
+function Login({ onLogin }) {
+  const [pwd, setPwd] = useState('')
 
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    if (pwd === 'aiot2026') {
+      localStorage.setItem('auth', 'true')
+      onLogin(true)
+    } else {
+      alert('Sai mật khẩu')
+    }
+  }
+
+  return (
+    <div style={S.wrap}>
+      <div style={S.card}>
+        {/* LEFT */}
+        <div style={S.left}>
+          <div style={S.logo}>AIoT</div>
+          <h2 style={S.title}>AIoT EDU</h2>
+          <p style={S.subtitle}>
+            Hệ thống học tập & nghiên cứu AIoT — DLU
+          </p>
+
+          <form onSubmit={handleSubmit} style={{width:'100%'}}>
+            <input
+              type="password"
+              placeholder="Nhập mật khẩu truy cập"
+              value={pwd}
+              onChange={e => setPwd(e.target.value)}
+              style={S.input}
+            />
+            <button style={S.btn}>Đăng nhập</button>
+          </form>
+        </div>
+
+        {/* RIGHT */}
+        <div style={S.right}>
+          <h3 style={S.contactTitle}>Liên hệ giảng viên</h3>
+
+          <div style={S.info}>
+            <div><strong>GV:</strong> Trần Vĩnh Phúc</div>
+            <div>
+              <strong>Email:</strong>{' '}
+              <a href="mailto:phuctv@dlu.edu.vn">phuctv@dlu.edu.vn</a>
+            </div>
+            <div>
+              <strong>SĐT:</strong>{' '}
+              <a href="tel:0976353605">0976353605</a>
+            </div>
+          </div>
+
+          <p style={S.note}>
+            Vui lòng liên hệ nếu bạn cần cấp quyền truy cập hệ thống.
+          </p>
+        </div>
+      </div>
+    </div>
+  )
+}
 function useIsMobile() {
   const [m, setM] = useState(() => window.innerWidth < 768)
   useEffect(() => {
@@ -114,9 +173,19 @@ function Topbar({ onMenu }) {
 }
 
 export default function App() {
+const [isAuth, setIsAuth] = useState(false)
+
+  useEffect(() => {
+    const saved = localStorage.getItem('auth')
+    if (saved === 'true') setIsAuth(true)
+  }, [])
+
+
   const [open, setOpen] = useState(false)
   const close = useCallback(() => setOpen(false), [])
-
+  if (!isAuth) {
+  return <Login onLogin={setIsAuth} />
+}
   return (
     <div style={{display:'flex',minHeight:'100vh'}}>
       <Sidebar open={open} onClose={close}/>
@@ -139,4 +208,103 @@ export default function App() {
       </div>
     </div>
   )
+}
+const S = {
+  wrap:{
+    height:'100vh',
+    display:'flex',
+    alignItems:'center',
+    justifyContent:'center',
+    background:`
+      radial-gradient(circle at 20% 20%, #1d4ed8, transparent 40%),
+      radial-gradient(circle at 80% 80%, #22c55e, transparent 40%),
+      #020617
+    `
+  },
+
+  card:{
+    display:'grid',
+    gridTemplateColumns:'1fr 1fr',
+    width:900,
+    backdropFilter:'blur(20px)',
+    background:'rgba(15,23,42,0.6)',
+    border:'1px solid rgba(255,255,255,0.08)',
+    borderRadius:20,
+    overflow:'hidden',
+    color:'#fff',
+    boxShadow:'0 20px 60px rgba(0,0,0,0.6)'
+  },
+
+  left:{
+    padding:'2.5rem'
+  },
+
+  right:{
+    padding:'2.5rem',
+    background:'linear-gradient(180deg, rgba(2,6,23,0.7), rgba(2,6,23,1))'
+  },
+
+  logo:{
+    fontSize:'2.5rem',
+    fontWeight:900,
+    background:'linear-gradient(135deg,#22c55e,#3b82f6)',
+    WebkitBackgroundClip:'text',
+    WebkitTextFillColor:'transparent',
+    marginBottom:10
+  },
+
+  title:{
+    marginTop:10,
+    fontSize:'1.6rem',
+    fontWeight:700
+  },
+
+  subtitle:{
+    fontSize:'.95rem',
+    color:'#94a3b8',
+    marginBottom:'1.5rem'
+  },
+
+  input:{
+    width:'100%',
+    padding:'14px',
+    marginTop:10,
+    marginBottom:14,
+    borderRadius:10,
+    border:'1px solid rgba(255,255,255,0.1)',
+    background:'rgba(255,255,255,0.05)',
+    color:'#fff',
+    outline:'none',
+    transition:'all .25s'
+  },
+
+  btn:{
+    width:'100%',
+    padding:'14px',
+    borderRadius:10,
+    background:'linear-gradient(135deg,#22c55e,#4ade80)',
+    border:'none',
+    fontWeight:600,
+    cursor:'pointer',
+    transition:'all .25s',
+    color:'#022c22'
+  },
+
+  contactTitle:{
+    marginBottom:12,
+    fontSize:'1.2rem',
+    color:'#22c55e',
+    fontWeight:600
+  },
+
+  info:{
+    lineHeight:1.9,
+    fontSize:'.95rem'
+  },
+
+  note:{
+    marginTop:15,
+    fontSize:'.85rem',
+    color:'#94a3b8'
+  }
 }
