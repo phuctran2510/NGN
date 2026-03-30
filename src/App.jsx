@@ -25,72 +25,90 @@ const NAV = [
 ]
 function Login({ onLogin }) {
   const [pwd, setPwd] = useState('')
+  const [shake, setShake] = useState(false)
+  const [focused, setFocused] = useState(false)
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    if (pwd === 'ngn2026') {
+    if (pwd === 'sdn2026') {
       localStorage.setItem('auth', 'true')
       onLogin(true)
     } else {
-      alert('Sai mật khẩu')
+      setShake(true)
+      setTimeout(() => setShake(false), 500)
     }
   }
 
   return (
     <div style={S.wrap}>
-      <div style={S.card}>
-        {/* LEFT */}
-        <div style={S.left}>
-          <div style={S.logo}>NGN</div>
-          <h2 style={S.title}>NGN EDU</h2>
-          <p style={S.subtitle}>
-            Hệ thống học tập & nghiên cứu NGN — DLU
-          </p>
+      {/* Animated grid background */}
+      <div style={S.grid}/>
+      <div style={S.glow1}/>
+      <div style={S.glow2}/>
 
-          <form onSubmit={handleSubmit} style={{width:'100%'}}>
-            <input
-              type="password"
-              placeholder="Nhập mật khẩu truy cập"
-              value={pwd}
-              onChange={e => setPwd(e.target.value)}
-              style={S.input}
-            />
-            <button style={S.btn}>Đăng nhập</button>
-          </form>
+      <div style={S.card}>
+        {/* Left — branding */}
+        <div style={S.left}>
+          <div style={S.badge}>SDN · CNTT · DLU</div>
+          <div style={S.logo}>
+            <span style={S.logoAccent}>SDN</span>
+            <span style={S.logoMain}>EDU</span>
+          </div>
+          <p style={S.tagline}>Hệ thống học tập & nghiên cứu<br/>Software Defined Networking</p>
+          <div style={S.divider}/>
+          <div style={S.meta}>
+            <div style={S.metaRow}><span style={S.metaDot}/> GV: Trần Vĩnh Phúc</div>
+            <div style={S.metaRow}><span style={S.metaDot}/> phuctv@dlu.edu.vn</div>
+            <div style={S.metaRow}><span style={S.metaDot}/> 0976 353 605</div>
+          </div>
         </div>
 
-        {/* RIGHT */}
+        {/* Right — login form */}
         <div style={S.right}>
-          <h3 style={S.contactTitle}>Liên hệ giảng viên</h3>
-
-          <div style={S.info}>
-            <div><strong>GV:</strong> Trần Vĩnh Phúc</div>
-            <div>
-              <strong>Email:</strong>{' '}
-              <a href="mailto:phuctv@dlu.edu.vn">phuctv@dlu.edu.vn</a>
-            </div>
-            <div>
-              <strong>SĐT:</strong>{' '}
-              <a href="tel:0976353605">0976353605</a>
-            </div>
+          <div style={S.formHead}>
+            <div style={S.lock}>🔐</div>
+            <h2 style={S.formTitle}>Truy cập hệ thống</h2>
+            <p style={S.formSub}>Nhập mật khẩu được cấp bởi giảng viên</p>
           </div>
 
-          <p style={S.note}>
-            Vui lòng liên hệ nếu bạn cần cấp quyền truy cập hệ thống.
-          </p>
+          <form onSubmit={handleSubmit}>
+            <div style={{
+              ...S.inputWrap,
+              ...(focused ? S.inputWrapFocus : {}),
+              ...(shake ? S.inputWrapShake : {})
+            }}>
+              <span style={S.inputIcon}>⬡</span>
+              <input
+                type="password"
+                placeholder="••••••••"
+                value={pwd}
+                onChange={e => setPwd(e.target.value)}
+                onFocus={() => setFocused(true)}
+                onBlur={() => setFocused(false)}
+                style={S.input}
+              />
+            </div>
+            <button type="submit" style={S.btn}>
+              <span>Đăng nhập</span>
+              <span style={S.btnArrow}>→</span>
+            </button>
+          </form>
+
+          <p style={S.hint}>Liên hệ giảng viên nếu chưa có mật khẩu</p>
         </div>
       </div>
+
+      <style>{`
+        @keyframes gridMove { from { transform: translateY(0) } to { transform: translateY(40px) } }
+        @keyframes shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-8px)} 40%{transform:translateX(8px)} 60%{transform:translateX(-5px)} 80%{transform:translateX(5px)} }
+        @keyframes fadeUp { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes pulse { 0%,100%{opacity:.6} 50%{opacity:1} }
+        .login-card { animation: fadeUp .5s cubic-bezier(.16,1,.3,1) both }
+        .login-btn:hover { background: linear-gradient(135deg,#00eeff,#00e676) !important; box-shadow: 0 8px 32px rgba(0,212,255,.35) !important; transform: translateY(-1px) }
+        .login-btn:active { transform: translateY(0) }
+      `}</style>
     </div>
   )
-}
-function useIsMobile() {
-  const [m, setM] = useState(() => window.innerWidth < 768)
-  useEffect(() => {
-    const h = () => setM(window.innerWidth < 768)
-    window.addEventListener('resize', h)
-    return () => window.removeEventListener('resize', h)
-  }, [])
-  return m
 }
 
 function Sidebar({ open, onClose }) {
@@ -210,101 +228,154 @@ const [isAuth, setIsAuth] = useState(false)
   )
 }
 const S = {
-  wrap:{
-    height:'100vh',
-    display:'flex',
-    alignItems:'center',
-    justifyContent:'center',
-    background:`
-      radial-gradient(circle at 20% 20%, #1d4ed8, transparent 40%),
-      radial-gradient(circle at 80% 80%, #22c55e, transparent 40%),
-      #020617
-    `
+  wrap: {
+    minHeight: '100vh',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    background: '#07090f',
+    padding: '1rem',
+    position: 'relative',
+    overflow: 'hidden',
+    fontFamily: "'Be Vietnam Pro', sans-serif",
   },
-
-  card:{
-    display:'grid',
-    gridTemplateColumns:'1fr 1fr',
-    width:900,
-    backdropFilter:'blur(20px)',
-    background:'rgba(15,23,42,0.6)',
-    border:'1px solid rgba(255,255,255,0.08)',
-    borderRadius:20,
-    overflow:'hidden',
-    color:'#fff',
-    boxShadow:'0 20px 60px rgba(0,0,0,0.6)'
+  grid: {
+    position: 'absolute', inset: 0,
+    backgroundImage: `
+      linear-gradient(rgba(0,212,255,.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,212,255,.04) 1px, transparent 1px)
+    `,
+    backgroundSize: '40px 40px',
+    animation: 'gridMove 4s linear infinite alternate',
+    pointerEvents: 'none',
   },
-
-  left:{
-    padding:'2.5rem'
+  glow1: {
+    position: 'absolute', top: '-20%', left: '-10%',
+    width: '50vw', height: '50vw',
+    background: 'radial-gradient(circle, rgba(0,212,255,.12) 0%, transparent 70%)',
+    pointerEvents: 'none',
   },
-
-  right:{
-    padding:'2.5rem',
-    background:'linear-gradient(180deg, rgba(2,6,23,0.7), rgba(2,6,23,1))'
+  glow2: {
+    position: 'absolute', bottom: '-20%', right: '-10%',
+    width: '45vw', height: '45vw',
+    background: 'radial-gradient(circle, rgba(0,230,118,.1) 0%, transparent 70%)',
+    pointerEvents: 'none',
   },
-
-  logo:{
-    fontSize:'2.5rem',
-    fontWeight:900,
-    background:'linear-gradient(135deg,#22c55e,#3b82f6)',
-    WebkitBackgroundClip:'text',
-    WebkitTextFillColor:'transparent',
-    marginBottom:10
+  card: {
+    position: 'relative', zIndex: 1,
+    display: 'grid',
+    gridTemplateColumns: 'clamp(200px, 40%, 340px) 1fr',
+    width: '100%', maxWidth: 820,
+    background: 'rgba(11,15,26,.85)',
+    border: '1px solid rgba(0,212,255,.15)',
+    borderRadius: 20,
+    overflow: 'hidden',
+    backdropFilter: 'blur(24px)',
+    boxShadow: '0 32px 80px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.05)',
+    animation: 'fadeUp .5s cubic-bezier(.16,1,.3,1) both',
   },
-
-  title:{
-    marginTop:10,
-    fontSize:'1.6rem',
-    fontWeight:700
+  left: {
+    padding: '2.5rem 2rem',
+    background: 'linear-gradient(160deg, rgba(0,212,255,.07) 0%, rgba(0,230,118,.04) 100%)',
+    borderRight: '1px solid rgba(0,212,255,.1)',
+    display: 'flex', flexDirection: 'column', justifyContent: 'center',
   },
-
-  subtitle:{
-    fontSize:'.95rem',
-    color:'#94a3b8',
-    marginBottom:'1.5rem'
+  badge: {
+    display: 'inline-block',
+    padding: '.25rem .7rem',
+    background: 'rgba(0,212,255,.1)',
+    border: '1px solid rgba(0,212,255,.2)',
+    borderRadius: 999,
+    fontSize: '.62rem',
+    fontFamily: "'JetBrains Mono', monospace",
+    color: '#00d4ff',
+    letterSpacing: '.1em',
+    marginBottom: '1.5rem',
   },
-
-  input:{
-    width:'100%',
-    padding:'14px',
-    marginTop:10,
-    marginBottom:14,
-    borderRadius:10,
-    border:'1px solid rgba(255,255,255,0.1)',
-    background:'rgba(255,255,255,0.05)',
-    color:'#fff',
-    outline:'none',
-    transition:'all .25s'
+  logo: {
+    fontSize: 'clamp(2rem, 5vw, 2.8rem)',
+    fontWeight: 800,
+    lineHeight: 1,
+    marginBottom: '.75rem',
+    fontFamily: "'Syne', sans-serif",
   },
-
-  btn:{
-    width:'100%',
-    padding:'14px',
-    borderRadius:10,
-    background:'linear-gradient(135deg,#22c55e,#4ade80)',
-    border:'none',
-    fontWeight:600,
-    cursor:'pointer',
-    transition:'all .25s',
-    color:'#022c22'
+  logoAccent: {
+    color: '#00d4ff',
+    display: 'block',
   },
-
-  contactTitle:{
-    marginBottom:12,
-    fontSize:'1.2rem',
-    color:'#22c55e',
-    fontWeight:600
+  logoMain: {
+    color: 'rgba(255,255,255,.15)',
+    display: 'block',
+    letterSpacing: '.05em',
   },
-
-  info:{
-    lineHeight:1.9,
-    fontSize:'.95rem'
+  tagline: {
+    fontSize: '.82rem',
+    color: 'rgba(255,255,255,.4)',
+    lineHeight: 1.7,
+    marginBottom: '1.5rem',
   },
-
-  note:{
-    marginTop:15,
-    fontSize:'.85rem',
-    color:'#94a3b8'
-  }
+  divider: {
+    height: 1,
+    background: 'linear-gradient(90deg, rgba(0,212,255,.3), transparent)',
+    marginBottom: '1.5rem',
+  },
+  meta: { display: 'flex', flexDirection: 'column', gap: '.45rem' },
+  metaRow: {
+    display: 'flex', alignItems: 'center', gap: '.5rem',
+    fontSize: '.78rem', color: 'rgba(255,255,255,.45)',
+    fontFamily: "'JetBrains Mono', monospace",
+  },
+  metaDot: {
+    width: 5, height: 5, borderRadius: '50%',
+    background: '#00d4ff', flexShrink: 0,
+    animation: 'pulse 2s ease infinite',
+  },
+  right: {
+    padding: '2.5rem',
+    display: 'flex', flexDirection: 'column', justifyContent: 'center',
+  },
+  formHead: { marginBottom: '2rem' },
+  lock: { fontSize: '1.8rem', marginBottom: '.75rem' },
+  formTitle: {
+    fontSize: '1.3rem', fontWeight: 700, color: '#fff',
+    marginBottom: '.35rem',
+  },
+  formSub: { fontSize: '.82rem', color: 'rgba(255,255,255,.35)' },
+  inputWrap: {
+    display: 'flex', alignItems: 'center', gap: '.75rem',
+    padding: '.8rem 1rem',
+    background: 'rgba(255,255,255,.04)',
+    border: '1px solid rgba(255,255,255,.1)',
+    borderRadius: 10,
+    marginBottom: '.85rem',
+    transition: 'all .2s',
+  },
+  inputWrapFocus: {
+    border: '1px solid rgba(0,212,255,.5)',
+    background: 'rgba(0,212,255,.04)',
+    boxShadow: '0 0 0 3px rgba(0,212,255,.1)',
+  },
+  inputWrapShake: { animation: 'shake .4s ease both' },
+  inputIcon: { fontSize: '.9rem', color: 'rgba(0,212,255,.5)', flexShrink: 0 },
+  input: {
+    flex: 1, background: 'none', border: 'none', outline: 'none',
+    color: '#fff', fontSize: '1rem', fontFamily: "'JetBrains Mono', monospace",
+    letterSpacing: '.15em',
+  },
+  btn: {
+    width: '100%', padding: '.85rem',
+    background: 'linear-gradient(135deg, #00d4ff, #00e676)',
+    border: 'none', borderRadius: 10,
+    color: '#000', fontWeight: 700, fontSize: '.9rem',
+    cursor: 'pointer', transition: 'all .2s',
+    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '.5rem',
+    fontFamily: "'Be Vietnam Pro', sans-serif",
+    className: 'login-btn',
+  },
+  btnArrow: { fontSize: '1rem', transition: 'transform .2s' },
+  hint: {
+    marginTop: '1.25rem',
+    fontSize: '.75rem', color: 'rgba(255,255,255,.2)',
+    textAlign: 'center',
+  },
 }
